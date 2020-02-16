@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "913675515308",
+    "firebase_url": "https://creative-8a569.firebaseio.com",
+    "project_id": "creative-8a569",
+    "storage_bucket": "creative-8a569.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913675515308:android:3be5b2e0d2efb3d3ef7609",
+        "android_client_info": {
+          "package_name": "com.crimsonscythe.lendy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "913675515308-1l6agjutqnsg039g9l5eaebkaghqu5gt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.crimsonscythe.lendy",
+            "certificate_hash": "d30adcf95f17ed9039a8d06aa229bcb79cbbc8a0"
+          }
+        },
+        {
+          "client_id": "913675515308-fhnnhhhnhfu7accdsrlj5lk7mtnpftie.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpwMINkuictoV1FV2oeHvmzXzgqZSyhRo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "913675515308-fhnnhhhnhfu7accdsrlj5lk7mtnpftie.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
