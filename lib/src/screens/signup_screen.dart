@@ -1,21 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lendy/src/blocs/bloc.dart';
+import 'package:lendy/src/blocs/provider.dart';
 
-class SignupScreen extends StatefulWidget {
-
-  @override
-  State<StatefulWidget> createState() {
-    return SignupScreenState();
-  }
-
-}
-
-class SignupScreenState extends State<SignupScreen> {
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _passwordController2 = TextEditingController();
+class SignupScreen extends StatelessWidget {
+//  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+//  final TextEditingController _emailController = TextEditingController();
+//  final TextEditingController _passwordController = TextEditingController();
+//  final TextEditingController _passwordController2 = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 //  final GoogleSignIn _googleSignIn = GoogleSignIn();
   String _userID = "";
@@ -25,108 +17,133 @@ class SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = Provider.of(context);
+
     return Scaffold(
-        appBar: AppBar(
-          title: Text("SignUp"),
+      appBar: AppBar(
+        title: Text("Signup"),
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            emailField(bloc),
+            passwordField(bloc),
+            passwordFieldRe(bloc),
+            SizedBox(
+              height: 10.0,
+            ),
+            button(bloc)
+          ],
         ),
-        body: Form(
-
-            key: _formKey,
-            child: Column(
-
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: 25.0, right: 25.0),
-                  child: TextFormField(
-                    keyboardType: TextInputType.emailAddress,
-                    controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    validator: (String value) {
-                      if (value.isEmpty) {
-                        return 'Please enter some text';
-                      }
-                      bool emailValid = RegExp(
-                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                          .hasMatch(value);
-                      if (!emailValid) {
-                        return 'Please enter a valid email';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  validator: (String value) {
-                    if (value.isEmpty) {
-                      return 'Please enter some text';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _passwordController2,
-                  decoration: const InputDecoration(
-                      labelText: 'Retype password'),
-                  validator: (String value) {
-                    if (value.isEmpty) {
-                      return 'Please enter some text';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
-                Container(
-                  child: RaisedButton(
-                    onPressed: () {
-                      if (_formKey.currentState.validate()) {
-                        _register();
-                      }
-                    },
-                    child: const Text('Register'),
-                  ),
-                ),
-              ],
-            )
-        )
+      ),
     );
   }
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
+  Widget emailField(Bloc bloc) {
+    return StreamBuilder(
+      stream: bloc.email,
+      builder: (context, snapshot) {
+        return TextField(
+          onChanged: bloc.changeEmail,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+              hintText: 'Enter email address',
+              labelText: 'Email-address',
+              errorText: snapshot.error),
+        );
+      },
+    );
   }
 
-  void _register() async {
-
-
-
-    final FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
-      email: _emailController.text,
-      password: _passwordController.text,
-    ))
-        .user;
-    if (user != null) {
-      setState(() {
-        _success = true;
-        _userEmail = user.email;
-        Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-
-//        Navigator.of(context).pushReplacementNamed('/home');
-
-      });
-    } else {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text("Error occured, please try again later"),
-      ));
-      _success = false;
-    }
+  Widget passwordField(Bloc bloc) {
+    return StreamBuilder(
+        stream: bloc.password,
+        builder: (context, snapshot) {
+          return TextField(
+            onChanged: bloc.changePassword,
+            decoration: InputDecoration(
+                hintText: 'Enter password',
+                labelText: 'Password',
+                errorText: snapshot.error),
+          );
+        });
   }
 
-}
+  Widget passwordFieldRe(Bloc bloc) {
+    return StreamBuilder(
+        stream: bloc.passwordretype,
+        builder: (context, snapshot) {
+          return TextField(
+            onChanged: bloc.changePasswordRetype,
+            decoration: InputDecoration(
+                hintText: 'Retype password',
+                labelText: 'Password',
+                errorText: snapshot.error),
+          );
+        });
+  }
+
+  Widget button(Bloc bloc) {
+    return StreamBuilder(
+      stream: bloc.submitValid,
+      builder: (context, snapshot) {
+        return RaisedButton(
+            child: Text('Register'),
+            color: Colors.blue,
+            //if true
+            onPressed: snapshot.hasData
+                ? () {
+//            bloc.showProgressBar(true);
+                    bloc.register();
+                  }
+                : null);
+      },
+    );
+  }
+
+  Widget buttons(Bloc bloc) {
+    return StreamBuilder(
+      stream: bloc.submitValid,
+      builder: (context, snapshot1) {
+        return StreamBuilder(
+          stream: bloc.signInStatus,
+          builder: (context, snapshot2) {
+            if (!snapshot2.hasData || snapshot2.hasError) {
+              return Column(
+                children: <Widget>[
+                  RaisedButton(
+                    child: Text('Register'),
+                    color: Colors.blue,
+                    onPressed: snapshot1.hasData
+                        ? () {
+                      bloc.register();
+                    }
+                        : null,
+                  ),
+                  snapshot2.hasError ? Text("ee") : Container()
+                ],
+              );
+            } else {
+              return CircularProgressIndicator();
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Widget submitButton(Bloc bloc) {
+    return StreamBuilder(
+        stream: bloc.signInStatus,
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return buttons(bloc);
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
+
+
+  }
+
+/

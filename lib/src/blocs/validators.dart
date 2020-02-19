@@ -9,7 +9,7 @@ class Validators {
         .hasMatch(email)){
           sink.add(email);
         } else {
-          sink.addError('valid email enter');
+          sink.addError('Please enter a valid email address.');
         }
       }
   );
@@ -19,7 +19,7 @@ class Validators {
         if (password.length > 3){
           sink.add(password);
         } else {
-          sink.addError('password error');
+          sink.addError('Password is too short.');
         }
       }
   );
@@ -27,11 +27,11 @@ class Validators {
 
   final validatePasswordRetype = StreamTransformer<String, String>.fromHandlers(
       handleData: (password, sink){
-
+        print("HANDLE DATA");
         if (password.length > 3){
           sink.add(password);
         } else {
-          sink.addError('password error');
+          sink.addError('Password is too short.');
         }
       }
   );
