@@ -83,7 +83,8 @@ class SigninScreenState extends State<SigninScreen> {
                   ): CircularProgressIndicator(),
                 ),
                 Container(
-                  child: _error?Text("Incorrect username or password.\nPlease try again.",textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red),):null,
+                  child: _error?Text("Incorrect username or password.\nPlease try again."
+                    ,textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red),):null,
                 )
               ],
             )

@@ -27,7 +27,6 @@ class Validators {
 
   final validatePasswordRetype = StreamTransformer<String, String>.fromHandlers(
       handleData: (password, sink){
-        print("HANDLE DATA");
         if (password.length > 3){
           sink.add(password);
         } else {
