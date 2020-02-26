@@ -15,10 +15,13 @@ class Bloc extends Object with Validators {
   //Add data to stream
   Stream<String> get email => _email.stream.transform(validateEmail);
   Stream<String> get password => _password.stream.transform(validatePassword)
+
+//  StreamSubscription<String> get subscription => _passwordretype.list
+
   .doOnData((String c) {
-    if (0 == _passwordretype.value.compareTo(c)) {
-      changePasswordRetype(_passwordretype.value);
-    }
+//    if (0 == _passwordretype.value.compareTo(c)) {
+//      changePasswordRetype(_passwordretype.value);
+//    }
   });
 
   Stream<String> get passwordretype=> _passwordretype.stream.transform(validatePasswordRetype)
@@ -34,23 +37,22 @@ class Bloc extends Object with Validators {
   Stream<bool> get submitValid =>
     Rx.combineLatest3(email, password, passwordretype, (e, p, r) {
 
-      print("has value" + _passwordretype.value);
-      print("has value2" + _password.value);
+      print("email: "+ e);
+      print("password: " + p);
+      print("passwordretype: " + r);
 
-      if(_password.value == _passwordretype.value){
-
-        return true;
-      }
-
-      if (!_passwordretype.hasValue || !_password.hasValue || !_email.hasValue){
-        return false;
-      }
-      if (p == _password.value && r == _passwordretype.value){
+      if (r == p){
         return true;
       } else {
         return false;
       }
-    });
+
+    })
+    .doOnEach(
+        (event) {
+          print("hello");
+        }
+    );
 
 
   //Change data

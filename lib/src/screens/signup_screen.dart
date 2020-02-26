@@ -139,15 +139,22 @@ class SignUpScreenState extends State<SignupScreen>{
 
   Widget passwordFieldRe(Bloc bloc) {
     return StreamBuilder(
-        stream: bloc.passwordretype,
+        stream: bloc.submitValid,
         builder: (context, snapshot) {
-          return TextField(
-            onChanged: bloc.changePasswordRetype,
-            decoration: InputDecoration(
-                hintText: 'Retype password',
-                labelText: 'Password',
-                errorText: snapshot.error),
+          return StreamBuilder(
+              stream: bloc.passwordretype,
+              builder: (context, snapshot2){
+                return TextField(
+                  onChanged: bloc.changePasswordRetype,
+                  decoration: InputDecoration(
+                      hintText: 'Retype password',
+                      labelText: 'Password',
+                      errorText: (snapshot.data != null && snapshot.data)? null : snapshot2.error),
+                );
+              },
+
           );
+
         });
   }
 
