@@ -16,8 +16,8 @@ class Bloc extends Object with Validators {
   Stream<String> get email => _email.stream.transform(validateEmail);
   Stream<String> get password => _password.stream.transform(validatePassword)
   .doOnData((String c) {
-    if (0 != _passwordretype.value.compareTo(c)) {
-
+    if (0 == _passwordretype.value.compareTo(c)) {
+      changePasswordRetype(_passwordretype.value);
     }
   });
 
@@ -34,7 +34,11 @@ class Bloc extends Object with Validators {
   Stream<bool> get submitValid =>
     Rx.combineLatest3(email, password, passwordretype, (e, p, r) {
 
+      print("has value" + _passwordretype.value);
+      print("has value2" + _password.value);
+
       if(_password.value == _passwordretype.value){
+
         return true;
       }
 
