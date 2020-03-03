@@ -31,16 +31,17 @@ void main() async {
   }
 
   runApp(
-    new App(defaultHome: _defaultHome)
-//    new MaterialApp(
-//      title: "App",
-//      home: _defaultHome,
-//      routes: <String, WidgetBuilder>{
-//        '/home': (BuildContext context) => new HomeScreen(),
-//        '/login': (BuildContext context) => new LoginScreen(),
-//        '/signup': (BuildContext context) => new SignupScreen(),
-//        '/signin': (BuildContext context) => new SigninScreen()
-//      },
-//    )
+    // line below was first
+//    new App(defaultHome: _defaultHome)
+    new MaterialApp(
+      title: "App",
+      home: App(),
+      routes: <String, WidgetBuilder>{
+        '/home': (BuildContext context) => new HomeScreen(),
+        '/login': (BuildContext context) => new LoginScreen(),
+        '/signup': (BuildContext context) => new SignupScreen(),
+        '/signin': (BuildContext context) => new SigninScreen()
+      },
+    )
   );
 }

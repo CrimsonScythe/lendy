@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -50,7 +51,7 @@ class LoginScreenState extends State<LoginScreen> {
                   _success == null
                       ? ''
                       : (_success
-                      ? 'Successfully signed in, uid: ' + _userID
+                      ? 'Successfully signed in!'
                       : 'Sign in failed'),
                   style: TextStyle(color: Colors.red),
                 ),
@@ -171,9 +172,12 @@ class LoginScreenState extends State<LoginScreen> {
 
   void _signInWithGoogle() async {
 
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-    await googleUser.authentication;
+    try {
+      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+
+
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -181,6 +185,8 @@ class LoginScreenState extends State<LoginScreen> {
 
     final FirebaseUser user =
         (await _auth.signInWithCredential(credential)).user;
+
+
     assert(user.email != null);
     assert(user.displayName != null);
     assert(!user.isAnonymous);
@@ -197,16 +203,22 @@ class LoginScreenState extends State<LoginScreen> {
         _success = true;
         _userID = user.uid;
       } else {
-        Scaffold.of(context).showSnackBar(SnackBar(
-          content: Text("Error occured, please try again later"),
-        ));
+//        Scaffold.of(context).showSnackBar(SnackBar(
+//          content: Text("Error occured, please try again later"),
+//        ));
         _success = false;
       }
     });
+    }
+    catch(error){
+//      print(error);
+    Fluttertoast.showToast(
+        msg: "Error occured, please try again.",
+        toastLength: Toast.LENGTH_LONG);
+      _success = false;
+    }
 
   }
-
-
 
 
 }

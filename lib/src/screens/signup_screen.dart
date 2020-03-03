@@ -1,71 +1,45 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lendy/src/blocs/bloc.dart';
 import 'package:lendy/src/blocs/provider.dart';
 
 class SignupScreen extends StatefulWidget {
-//  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-//  final TextEditingController _emailController = TextEditingController();
-//  final TextEditingController _passwordController = TextEditingController();
-//  final TextEditingController _passwordController2 = TextEditingController();
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final Bloc bloc = Bloc();
-
-//  final bloc = Provider.of(context);
-
-//  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  String _userID = "";
-
-  bool _success;
-  String _userEmail;
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    final bloc = Provider.of(context);
-//
-//
-//    return Scaffold(
-//      appBar: AppBar(
-//        title: Text("Signup"),
-//      ),
-//      body: Container(
-//        child: Column(
-//          children: <Widget>[
-//            emailField(bloc),
-//            passwordField(bloc),
-//            passwordFieldRe(bloc),
-//            SizedBox(
-//              height: 10.0,
-//            ),
-//            buttons(bloc)
-//          ],
-//        ),
-//      ),
-//    );
-//  }
-
-
 
   @override
   State<StatefulWidget> createState() {
     return SignUpScreenState();
   }
 
-
 }
 
 
 class SignUpScreenState extends State<SignupScreen>{
 
-
-
   @override
   void initState() {
     super.initState();
 
-  }
+    FirebaseAuth.instance.onAuthStateChanged.listen((firebaseUser){
+      if (firebaseUser != null){
 
+        Fluttertoast.showToast(
+          msg: "Login successful!",
+          gravity: ToastGravity.BOTTOM,
+          toastLength: Toast.LENGTH_LONG
+        );
+
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (Route<dynamic> route) => false);
+
+//        Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+      }
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,9 +65,6 @@ class SignUpScreenState extends State<SignupScreen>{
     );
 
 
-
-
-
   }
 
 
@@ -102,8 +73,6 @@ class SignUpScreenState extends State<SignupScreen>{
 
     widget.bloc.dispose();
     super.dispose();
-
-
 
   }
 
@@ -193,7 +162,7 @@ class SignUpScreenState extends State<SignupScreen>{
                     }
                         : null,
                   ),
-                  snapshot2.hasError ? Text("Incorrect username or password.\nPlease try again."
+                  snapshot2.hasError ? Text(snapshot2.error.toString()
                     ,textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red),) : Container()
                 ],
               );
@@ -217,8 +186,5 @@ class SignUpScreenState extends State<SignupScreen>{
           }
         });
   }
-
-
-
 
 }

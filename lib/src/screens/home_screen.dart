@@ -21,6 +21,7 @@ class HomeScreenState extends State<HomeScreen> {
       appBar: new AppBar(title: Text("Home"), ),
       body: Center(
         child: RaisedButton(
+          child: Text("logout"),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.of(context).pushReplacementNamed('/login');
