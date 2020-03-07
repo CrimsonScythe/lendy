@@ -98,6 +98,8 @@ class SigninScreenState extends State<SigninScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Sign in"),
@@ -112,7 +114,7 @@ class SigninScreenState extends State<SigninScreen> {
             SizedBox(
               height: 10.0,
             ),
-            buttons(widget.bloc)
+            buttons(widget.bloc, context)
           ],
         ),
       ),
@@ -150,7 +152,7 @@ class SigninScreenState extends State<SigninScreen> {
         });
   }
 
-  Widget buttons(Bloc bloc) {
+  Widget buttons(Bloc bloc, BuildContext buildContext) {
     return StreamBuilder(
       stream: bloc.loginValid,
       builder: (context, snapshot1) {
@@ -165,7 +167,7 @@ class SigninScreenState extends State<SigninScreen> {
                     color: Colors.blue,
                     onPressed: snapshot1.hasData && snapshot1.data
                         ? () {
-                            bloc.signIn();
+                      signIn(bloc, buildContext);
                           }
                         : null,
                   ),
@@ -205,5 +207,19 @@ class SigninScreenState extends State<SigninScreen> {
   void dispose() {
     widget.bloc.dispose();
     super.dispose();
+  }
+
+  void signIn(bloc, con) async{
+    var isSignedin = await bloc.signIn();
+
+    if (isSignedin){
+//      Navigator.pushNamedAndRemoveUntil(con, newRouteName, predicate)
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+//      Navigator.pushNamed(con, '/home');
+//
+//      Navigator.pushnam(con,'/home', (Route<dynamic> route) => false);
+
+    }
+
   }
 }

@@ -19,29 +19,15 @@ void main() async {
 
   Widget _defaultHome = LoginScreen();
 
-//  bool _result1 = await _googleSignIn.isSignedIn();
   FirebaseUser _result2 = await _auth.currentUser();
 
-//  if (_result1 || _result2 != null) {
-//    _defaultHome = new HomeScreen();
-//  }
 
   if (_result2 != null){
     _defaultHome = new HomeScreen();
   }
 
   runApp(
-    // line below was first
-//    new App(defaultHome: _defaultHome)
-    new MaterialApp(
-      title: "App",
-      home: App(),
-      routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => new HomeScreen(),
-        '/login': (BuildContext context) => new LoginScreen(),
-        '/signup': (BuildContext context) => new SignupScreen(),
-        '/signin': (BuildContext context) => new SigninScreen()
-      },
-    )
+
+    new App(defaultHome: _defaultHome)
   );
 }

@@ -23,21 +23,21 @@ class SignUpScreenState extends State<SignupScreen>{
   @override
   void initState() {
     super.initState();
-
-    FirebaseAuth.instance.onAuthStateChanged.listen((firebaseUser){
-      if (firebaseUser != null){
-
-        Fluttertoast.showToast(
-          msg: "Login successful!",
-          gravity: ToastGravity.BOTTOM,
-          toastLength: Toast.LENGTH_LONG
-        );
-
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (Route<dynamic> route) => false);
-
+//
+//    FirebaseAuth.instance.onAuthStateChanged.listen((firebaseUser){
+//      if (firebaseUser != null){
+//
+//        Fluttertoast.showToast(
+//          msg: "Login successful!",
+//          gravity: ToastGravity.BOTTOM,
+//          toastLength: Toast.LENGTH_LONG
+//        );
+//
+//
+//
 //        Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-      }
-    });
+//      }
+//    });
 
   }
 
@@ -58,7 +58,7 @@ class SignUpScreenState extends State<SignupScreen>{
             SizedBox(
               height: 10.0,
             ),
-            buttons(widget.bloc)
+            buttons(widget.bloc, context)
           ],
         ),
       ),
@@ -127,23 +127,8 @@ class SignUpScreenState extends State<SignupScreen>{
         });
   }
 
-  Widget button(Bloc bloc) {
-    return StreamBuilder(
-      stream: bloc.submitValid,
-      builder: (context, snapshot) {
-        return RaisedButton(
-            child: Text('Register'),
-            color: Colors.blue,
-            onPressed: snapshot.hasData && snapshot.data
-                ? () {
-              bloc.register();
-            }
-                : null);
-      },
-    );
-  }
 
-  Widget buttons(Bloc bloc) {
+  Widget buttons(Bloc bloc, BuildContext buildContext) {
     return StreamBuilder(
       stream: bloc.submitValid,
       builder: (context, snapshot1) {
@@ -158,7 +143,7 @@ class SignUpScreenState extends State<SignupScreen>{
                     color: Colors.blue,
                     onPressed: snapshot1.hasData && snapshot1.data
                         ? () {
-                      bloc.register();
+                      register(bloc, buildContext);
                     }
                         : null,
                   ),
@@ -180,11 +165,24 @@ class SignUpScreenState extends State<SignupScreen>{
         stream: bloc.signInStatus,
         builder: (context, snapshot) {
           if (snapshot.hasError || !snapshot.hasData) {
-            return buttons(bloc);
+            return buttons(bloc, context);
           } else {
             return CircularProgressIndicator();
           }
         });
+  }
+
+  void register(Bloc bloc, BuildContext buildContext) async {
+    var isRegistered = await bloc.register();
+
+    if (isRegistered){
+//      Navigator.pushNamedAndRemoveUntil(con, newRouteName, predicate)
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+//      Navigator.pushNamed(con, '/home');
+//
+//      Navigator.pushnam(con,'/home', (Route<dynamic> route) => false);
+
+    }
   }
 
 }

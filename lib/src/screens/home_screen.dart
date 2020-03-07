@@ -24,21 +24,12 @@ class HomeScreenState extends State<HomeScreen> {
           child: Text("logout"),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              Navigator.of(context).pushReplacementNamed('/login');
+              Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
             }
         ),
       ),
     );
 
-//    return MaterialApp(
-//      home: Scaffold(
-//        body: Text("Hello"),
-//        floatingActionButton: FloatingActionButton.extended(
-//            icon: Icon(Icons.add),
-//            onPressed: null,
-//            label: Text("Lend")),
-//      ),
-//    );
   }
 
 }

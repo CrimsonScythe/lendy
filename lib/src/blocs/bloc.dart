@@ -59,7 +59,7 @@ class Bloc extends Object with Validators {
   Function(bool) get showProgressBar => _isSignedIn.add;
 
 
-  signIn() async {
+  Future<bool> signIn() async {
 
     showProgressBar(true);
     final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -74,7 +74,7 @@ class Bloc extends Object with Validators {
 
       if (user != null) {
         // Navigate to home screen
-
+        return true;
 //        setState(() {
 //          _showLoading = false;
 //          _error = false;
@@ -84,7 +84,7 @@ class Bloc extends Object with Validators {
 ////        Navigator.of(context).pushReplacementNamed('/home');
 //        });
       } else {
-
+        return false;
       }
 
     }
@@ -119,11 +119,11 @@ class Bloc extends Object with Validators {
       }
 
       _isSignedIn.addError(error);
-      print(err.code);
+      return false;
     }
   }
 
-  register() async {
+  Future<bool> register() async {
 
     final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -135,7 +135,7 @@ class Bloc extends Object with Validators {
       ))
           .user;
       if (user != null) {
-
+        return true;
 //        setState(() {
 //          _success = true;
 //          _userEmail = user.email;
@@ -146,6 +146,7 @@ class Bloc extends Object with Validators {
 //
 //        });
       } else {
+        return false;
 //        Scaffold.of(context).showSnackBar(SnackBar(
 //          content: Text("Error occured, please try again later"),
 //        ));
@@ -174,7 +175,7 @@ class Bloc extends Object with Validators {
       }
 
       _isSignedIn.addError(error);
-      print(err.code);
+      return false;
 
     }
 
@@ -227,7 +228,7 @@ class Bloc extends Object with Validators {
 
   }
 
-  dispose() {
+  dispose() async {
     _email.drain();
     _email.close();
     _password.drain();
