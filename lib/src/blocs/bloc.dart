@@ -136,21 +136,10 @@ class Bloc extends Object with Validators {
           .user;
       if (user != null) {
         return true;
-//        setState(() {
-//          _success = true;
-//          _userEmail = user.email;
-//          Navigator.of(context).pushNamedAndRemoveUntil(
-//              '/home', (Route<dynamic> route) => false);
-//
-////        Navigator.of(context).pushReplacementNamed('/home');
-//
-//        });
+
       } else {
         return false;
-//        Scaffold.of(context).showSnackBar(SnackBar(
-//          content: Text("Error occured, please try again later"),
-//        ));
-//        _success = false;
+
       }
     } catch (err) {
 

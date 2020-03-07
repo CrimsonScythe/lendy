@@ -23,78 +23,7 @@ class SigninScreenState extends State<SigninScreen> {
   void initState() {
     super.initState();
 
-//    FirebaseAuth.instance.onAuthStateChanged.listen((firebaseUser){
-//      if (firebaseUser != null){
-//
-////        Navigator.pushNamedAndRemoveUntil(context, '/home', (Route<dynamic> route) => false);
-//      }
-//    });
   }
-
-//  @override
-//  Widget build(BuildContext context) {
-//    return Scaffold(
-//      appBar: AppBar(
-//        title: Text("Signup"),
-//      ),
-//      body: StreamBuilder(
-//          stream: _auth.onAuthStateChanged,
-//          builder: (context, snapshot) {
-//            if (snapshot.hasData && !snapshot.hasError) {
-////              Navigator.pushNamedAndRemoveUntil(context, "/home", (Route<dynamic> route) => false);
-//              return HomeScreen();
-//            } else {
-////              return LoginScreen();
-////            return LoginScreen();
-//            return Scaffold(
-//              body:
-//                             Container(
-//                child: Column(
-//                  children: <Widget>[
-//                    emailField(widget.bloc),
-//                    passwordField(widget.bloc),
-////            forgotPasswor
-////            passwordFieldRe(widget.bloc),
-//                    SizedBox(
-//                      height: 10.0,
-//                    ),
-//                    buttons(widget.bloc)
-//                  ],
-//                ),
-//              ),
-//            );
-////               Container(
-////                child: Column(
-////                  children: <Widget>[
-////                    emailField(widget.bloc),
-////                    passwordField(widget.bloc),
-//////            forgotPasswor
-//////            passwordFieldRe(widget.bloc),
-////                    SizedBox(
-////                      height: 10.0,
-////                    ),
-////                    buttons(widget.bloc)
-////                  ],
-////                ),
-////              );
-//            }
-//          }),
-////      Container(
-////        child: Column(
-////          children: <Widget>[
-////            emailField(widget.bloc),
-////            passwordField(widget.bloc),
-//////            forgotPasswor
-//////            passwordFieldRe(widget.bloc),
-////            SizedBox(
-////              height: 10.0,
-////            ),
-////            buttons(widget.bloc)
-////          ],
-////        ),
-////      ),
-//    );
-//  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,8 +38,6 @@ class SigninScreenState extends State<SigninScreen> {
           children: <Widget>[
             emailField(widget.bloc),
             passwordField(widget.bloc),
-//            forgotPasswor
-//            passwordFieldRe(widget.bloc),
             SizedBox(
               height: 10.0,
             ),
@@ -213,11 +140,8 @@ class SigninScreenState extends State<SigninScreen> {
     var isSignedin = await bloc.signIn();
 
     if (isSignedin){
-//      Navigator.pushNamedAndRemoveUntil(con, newRouteName, predicate)
+
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-//      Navigator.pushNamed(con, '/home');
-//
-//      Navigator.pushnam(con,'/home', (Route<dynamic> route) => false);
 
     }
 

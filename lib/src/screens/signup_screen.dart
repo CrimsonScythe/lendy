@@ -23,21 +23,7 @@ class SignUpScreenState extends State<SignupScreen>{
   @override
   void initState() {
     super.initState();
-//
-//    FirebaseAuth.instance.onAuthStateChanged.listen((firebaseUser){
-//      if (firebaseUser != null){
-//
-//        Fluttertoast.showToast(
-//          msg: "Login successful!",
-//          gravity: ToastGravity.BOTTOM,
-//          toastLength: Toast.LENGTH_LONG
-//        );
-//
-//
-//
-//        Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-//      }
-//    });
+
 
   }
 
@@ -176,11 +162,8 @@ class SignUpScreenState extends State<SignupScreen>{
     var isRegistered = await bloc.register();
 
     if (isRegistered){
-//      Navigator.pushNamedAndRemoveUntil(con, newRouteName, predicate)
+
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-//      Navigator.pushNamed(con, '/home');
-//
-//      Navigator.pushnam(con,'/home', (Route<dynamic> route) => false);
 
     }
   }

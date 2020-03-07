@@ -132,19 +132,15 @@ class LoginScreenState extends State<LoginScreen> {
       if (user != null) {
         Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
 
-//        Navigator.of(context).pushReplacementNamed('/home');
         _success = true;
         _userID = user.uid;
       } else {
-//        Scaffold.of(context).showSnackBar(SnackBar(
-//          content: Text("Error occured, please try again later"),
-//        ));
+
         _success = false;
       }
     });
     }
     catch(error){
-//      print(error);
     Fluttertoast.showToast(
         msg: "Error occured, please try again.",
         toastLength: Toast.LENGTH_LONG);
