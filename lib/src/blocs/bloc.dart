@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lendy/resources/repository.dart';
 
 import 'validators.dart';
 import 'dart:io';
@@ -11,7 +12,7 @@ class Bloc extends Object with Validators {
   final _password = BehaviorSubject<String>();
   final _passwordretype = BehaviorSubject<String>();
   final _isSignedIn = BehaviorSubject<bool>();
-
+  final _repository = Repository();
 
   //Add data to stream
   Stream<String> get email => _email.stream.transform(validateEmail);
@@ -73,16 +74,16 @@ class Bloc extends Object with Validators {
 
 
       if (user != null) {
-        // Navigate to home screen
+
+        /**
+         * add id to repository
+         */
+
+        _repository.user_ID=user.uid;
+
+
         return true;
-//        setState(() {
-//          _showLoading = false;
-//          _error = false;
-//          _userEmail = user.email;
-//          Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-//
-////        Navigator.of(context).pushReplacementNamed('/home');
-//        });
+
       } else {
         return false;
       }
@@ -135,6 +136,19 @@ class Bloc extends Object with Validators {
       ))
           .user;
       if (user != null) {
+
+        /**
+         * add id to repository
+         */
+
+        _repository.user_ID=user.uid;
+
+        /**
+         * add user to firestore here
+         */
+
+        await _repository.addUser(user.uid);
+
         return true;
 
       } else {

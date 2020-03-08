@@ -163,7 +163,7 @@ class SignUpScreenState extends State<SignupScreen>{
 
     if (isRegistered){
 
-      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false,);
 
     }
   }
