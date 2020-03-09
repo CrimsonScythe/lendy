@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:lendy/src/blocs/bloc.dart';
 
 class LoginScreen extends StatefulWidget {
+
+  final Bloc bloc = new Bloc();
+
   @override
   State<StatefulWidget> createState() {
     return LoginScreenState();
@@ -32,66 +36,82 @@ class LoginScreenState extends State<LoginScreen> {
           title: Text("Login"),
         ),
         body:
-          Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              SizedBox(height: 20.0,),
-              Container(
-                child: GoogleSignInButton(
-                  onPressed: () async {
-                    _signInWithGoogle();
-                  },
+            StreamBuilder(
+              stream: widget.bloc.signInStatus,
+              builder: (context, snapshot){
+                if (!snapshot.hasData || snapshot.hasError) {
+                  return loginForm(snapshot);
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator()
+                  );
+                }
+              },
+            )
 
-                ),
+    );
+  }
+
+  Widget loginForm(snapshot) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        SizedBox(height: 20.0,),
+        Container(
+          child: GoogleSignInButton(
+            onPressed: () {
+              _signInWithGoogle(widget.bloc);
+            },
+
+          ),
+        ),
+        Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: snapshot.hasError ?
+          Text(
+            snapshot.error.toString(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.red),
+          ):
+              Container()
+        ),
+        Container(
+          child: FacebookSignInButton(
+            onPressed: () {
+
+            },
+
+          ),
+
+        ),
+        SizedBox(height: 15.0,),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              child: RaisedButton(
+                onPressed: (){
+                  Navigator.of(context).pushNamed('/signup');
+                },
+                child: const Text("Sign up"),
               ),
-              Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  _success == null
-                      ? ''
-                      : (_success
-                      ? 'Successfully signed in!'
-                      : 'Sign in failed'),
-                  style: TextStyle(color: Colors.red),
-                ),
+            ),
+            SizedBox(width: 10.0,),
+            Container(
+              child: RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/signin');
+                },
+                child: const Text("Login"),
               ),
-              Container(
-                child: FacebookSignInButton(
-                  onPressed: () {
+            ),
 
-                  },
-
-                ),
-
-              ),
-              SizedBox(height: 15.0,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    child: RaisedButton(
-                        onPressed: (){
-                          Navigator.of(context).pushNamed('/signup');
-                        },
-                      child: const Text("Sign up"),
-                    ),
-                  ),
-                  SizedBox(width: 10.0,),
-                  Container(
-                    child: RaisedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/signin');
-                        },
-                      child: const Text("Login"),
-                    ),
-                  ),
-
-                ],
-              ),
-              SizedBox(height: 25.0,),
-            ],
-          )
+          ],
+        ),
+        SizedBox(height: 25.0,),
+      ],
     );
   }
 
@@ -102,52 +122,63 @@ class LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _signInWithGoogle(Bloc bloc) async {
+    var isSignedin = await bloc.signInWithGoogle();
 
-  void _signInWithGoogle() async {
+    if (isSignedin) {
 
-    try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
 
-
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final FirebaseUser user =
-        (await _auth.signInWithCredential(credential)).user;
-
-
-    assert(user.email != null);
-    assert(user.displayName != null);
-    assert(!user.isAnonymous);
-    assert(await user.getIdToken() != null);
-
-    final FirebaseUser currentUser = await _auth.currentUser();
-    assert(user.uid == currentUser.uid);
-
-    setState(() {
-      if (user != null) {
-        Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-
-        _success = true;
-        _userID = user.uid;
-      } else {
-
-        _success = false;
-      }
-    });
-    }
-    catch(error){
-    Fluttertoast.showToast(
-        msg: "Error occured, please try again.",
-        toastLength: Toast.LENGTH_LONG);
-      _success = false;
     }
 
   }
+
+
+//  void _signInWithGoogle() async {
+//
+//    try {
+//      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+//
+//
+//    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+//
+//    final AuthCredential credential = GoogleAuthProvider.getCredential(
+//      accessToken: googleAuth.accessToken,
+//      idToken: googleAuth.idToken,
+//    );
+//
+//    final FirebaseUser user =
+//        (await _auth.signInWithCredential(credential)).user;
+//
+//
+//    assert(user.email != null);
+//    assert(user.displayName != null);
+//    assert(!user.isAnonymous);
+//    assert(await user.getIdToken() != null);
+//
+//    final FirebaseUser currentUser = await _auth.currentUser();
+//    assert(user.uid == currentUser.uid);
+//
+//    setState(() {
+//      if (user != null) {
+//        Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+//
+//        _success = true;
+//        _userID = user.uid;
+//      } else {
+//
+//        _success = false;
+//      }
+//    });
+//    }
+//    catch(error){
+//    Fluttertoast.showToast(
+//        msg: "Error occured, please try again.",
+//        toastLength: Toast.LENGTH_LONG);
+//      _success = false;
+//    }
+//
+//  }
 
 
 }

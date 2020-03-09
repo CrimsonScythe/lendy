@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lendy/resources/repository.dart';
 
 import 'validators.dart';
@@ -13,6 +14,8 @@ class Bloc extends Object with Validators {
   final _passwordretype = BehaviorSubject<String>();
   final _isSignedIn = BehaviorSubject<bool>();
   final _repository = Repository();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   //Add data to stream
   Stream<String> get email => _email.stream.transform(validateEmail);
@@ -227,6 +230,59 @@ class Bloc extends Object with Validators {
 
       _isSignedIn.addError(error);
       print(err.code);
+    }
+
+  }
+
+  Future<bool> signInWithGoogle() async {
+
+    try {
+
+      showProgressBar(true);
+
+      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final FirebaseUser user =
+          (await _auth.signInWithCredential(credential)).user;
+
+
+
+      assert(user.email != null);
+      assert(user.displayName != null);
+      assert(!user.isAnonymous);
+      assert(await user.getIdToken() != null);
+
+      final FirebaseUser currentUser = await _auth.currentUser();
+      assert(user.uid == currentUser.uid);
+
+      //TODO: Please recheck assertions
+
+      /**
+       * Assertions work, so fill DB with userID
+       */
+
+      _repository.user_ID=user.uid;
+
+      await _repository.addUser(user.uid);
+
+
+      return true;
+
+    }
+    catch(error){
+
+
+      _isSignedIn.addError(error);
+      return false;
+
     }
 
   }
