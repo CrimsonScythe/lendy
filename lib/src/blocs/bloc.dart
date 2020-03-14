@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lendy/resources/repository.dart';
 
@@ -144,7 +145,9 @@ class Bloc extends Object with Validators {
          * add id to repository
          */
 
-        _repository.user_ID=user.uid;
+        _repository.user_ID = user.uid;
+
+        print(_repository.user_ID);
 
         /**
          * add user to firestore here
@@ -230,6 +233,67 @@ class Bloc extends Object with Validators {
 
       _isSignedIn.addError(error);
       print(err.code);
+    }
+
+  }
+
+  Future<bool> signInWithFace() async {
+    try {
+
+      showProgressBar(true);
+
+      FacebookLogin facebookLogin = FacebookLogin();
+      FacebookLoginResult facebookLoginResult = await facebookLogin.logIn(['email']);
+
+      switch (facebookLoginResult.status) {
+        case FacebookLoginStatus.cancelledByUser:
+            print('cancelled');
+            break;
+        case FacebookLoginStatus.error:
+            print('error');
+            break;
+        case FacebookLoginStatus.loggedIn:
+            print('loggedin');
+            break;
+      }
+
+      final token = facebookLoginResult.accessToken.token;
+
+      if (facebookLoginResult.status == FacebookLoginStatus.loggedIn) {
+        final facebookAuthCred = FacebookAuthProvider.getCredential(accessToken: token);
+
+        final FirebaseUser user =
+            (await _auth.signInWithCredential(facebookAuthCred)).user;
+
+        assert(user.email != null);
+        assert(user.displayName != null);
+        assert(!user.isAnonymous);
+        assert(await user.getIdToken() != null);
+
+        final FirebaseUser currentUser = await _auth.currentUser();
+        assert(user.uid == currentUser.uid);
+
+        //TODO: Please recheck assertions
+
+        /**
+         * Assertions work, so fill DB with userID
+         */
+
+        _repository.user_ID=user.uid;
+
+        await _repository.addUser(user.uid);
+
+
+        return true;
+
+      }
+
+      return false;
+
+    }
+    catch (error) {
+      _isSignedIn.addError(error);
+      return false;
     }
 
   }

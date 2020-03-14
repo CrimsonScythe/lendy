@@ -15,6 +15,7 @@ class PostsBloc{
   Stream<bool> get showProgress => _showProgress.stream;
 
   void upload(pID) {
+    print(_repository.user_ID);
     _showProgress.sink.add(true);
     _repository
     .uploadPic(_repository.user_ID, pID)

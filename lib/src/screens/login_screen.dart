@@ -80,7 +80,7 @@ class LoginScreenState extends State<LoginScreen> {
         Container(
           child: FacebookSignInButton(
             onPressed: () {
-
+              _signInWithFace(widget.bloc);
             },
 
           ),
@@ -131,6 +131,16 @@ class LoginScreenState extends State<LoginScreen> {
 
     }
 
+  }
+
+  void _signInWithFace(Bloc bloc) async {
+    var isSignedin = await bloc.signInWithFace();
+
+    if (isSignedin) {
+
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+
+    }
   }
 
 
