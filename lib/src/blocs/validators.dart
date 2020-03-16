@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:io';
+
+import 'dart:math';
 
 class Validators {
 
@@ -32,6 +35,41 @@ class Validators {
         } else {
           sink.addError('Password is too short.');
         }
+      }
+  );
+
+  final validateTitle = StreamTransformer<String, String>.fromHandlers(
+    handleData: (title, sink) {
+      if (title.length > 0){
+        sink.add(title);
+      } else {
+        sink.addError('Title cannot be empty');
+      }
+
+      // for error:
+    }
+  );
+
+  final validateDes = StreamTransformer<String, String>.fromHandlers(
+      handleData: (des, sink) {
+        if (des.length > 0){
+          sink.add(des);
+        } else {
+          sink.addError('Description cannot be empty');
+        }
+
+        //for error:
+      }
+  );
+
+  final validatePic = StreamTransformer<File, File>.fromHandlers(
+      handleData: (des, sink) {
+        if (!des.existsSync()){
+          sink.addError('Error reading file');
+        } else {
+          sink.add(des);
+        }
+        //for error:
       }
   );
 

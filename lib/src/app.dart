@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lendy/src/blocs/provider.dart';
 import 'package:lendy/src/screens/forgotpass_screen.dart';
+import 'package:lendy/src/screens/lend.dart';
 import 'package:lendy/src/screens/login_screen.dart';
 import 'package:lendy/src/screens/signin_screen.dart';
 import 'package:lendy/src/screens/signup_screen.dart';
@@ -25,6 +26,7 @@ class App extends StatelessWidget {
         '/signup': (BuildContext context) => new SignupScreen(),
         '/signin': (BuildContext context) => new SigninScreen(),
         '/forgotpass' : (BuildContext context) => new ForgotPassScreen(),
+        '/lend' : (BuildContext context) => new LendScreen()
       },
     );
     return Provider(
