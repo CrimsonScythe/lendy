@@ -1,10 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
-import 'package:lendy/src/blocs/bloc.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 class LendScreen extends StatefulWidget {
   final ItemBloc bloc = ItemBloc();
@@ -18,15 +15,9 @@ class LendScreen extends StatefulWidget {
 class LendScreenState extends State<LendScreen> {
   var itemCount = 1;
 
-
   @override
   void initState() {
     super.initState();
-    widget.bloc.pic.listen((data){
-      setState(() {
-        itemCount=itemCount+1;
-      });
-    });
   }
 
   @override
@@ -50,15 +41,22 @@ class LendScreenState extends State<LendScreen> {
           ],
         ),
       ),
-      floatingActionButton:
-//          StreamBuilder(
-//            stream: widget.bloc.nextValid,
-//          )
-          FloatingActionButton.extended(
-        backgroundColor: Colors.grey,
-        onPressed: () {},
-        icon: Icon(Icons.navigate_next),
-        label: Text('Next'),
+      floatingActionButton: StreamBuilder(
+        stream: widget.bloc.nextValid,
+        builder: (context, snapshot) {
+          return FloatingActionButton.extended(
+            backgroundColor: !snapshot.hasData || !snapshot.data ? Colors.grey : Colors.blue,
+//            onPressed: !snapshot.hasData || !snapshot.data ? null : () {
+//              print("pressed");
+//            },
+              onPressed: () {
+
+//                widget.bloc.changeTitle('');
+              },
+              icon: Icon(Icons.navigate_next),
+            label: Text('Next'),
+          );
+        },
       ),
     );
   }
@@ -71,54 +69,77 @@ class LendScreenState extends State<LendScreen> {
 
   Widget imgW(bloc) {
     return Container(
+      padding: EdgeInsets.all(8.0),
       height: 200,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.all(10),
-        itemCount: itemCount,
-        itemBuilder: (BuildContext context, int index){
-          return StreamBuilder(
-            stream: widget.bloc.pic,
-            builder: (context, snapshot1) {
-              if (!snapshot1.hasData || widget.bloc.photosList.length <= index) {
-                return dottedBorder();
-              } else {
+      child:
+      Column(
+        children: <Widget>[
+          Expanded(
+            child: StreamBuilder(
+              stream: widget.bloc.picList,
+              builder: (context, snapshot1) {
+                return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (con, index) {
+                      print(index);
+                      if (!snapshot1.hasData || index == snapshot1.data.length) {
+                        return dottedBorder();
+                      }
+//                if (snapshot1.data[index]==null) {
+//                  return SizedBox.shrink();
+//                }
+                      else {
+                        return Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: <Widget>[
+                            Image(
+                              image: FileImage(snapshot1.data[index]),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: MaterialButton(
+                                shape: CircleBorder(),
+                                child: Icon(
+                                  Icons.delete,
+                                  color: Colors.black,
+                                ),
+                                color: Colors.white,
+                                onPressed: () {
+                                  print("index" + index.toString());
+                                  _delete(context, index);
+                                },
+                              ),
+                            )
+                          ],
+                        );
+                      }
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(
+                      width: 10.0,
+                    ),
+                    itemCount: !snapshot1.hasData ? 1 : snapshot1.data.length + 1);
+              },
+            ),
+          ),
 
-                return Image(
-                    image: FileImage(widget.bloc.photosList[index])
-                );
+          StreamBuilder(
+              stream: widget.bloc.picList,
+              builder: (context, snapshot) {
+                return snapshot.data == null || snapshot.hasError ?
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'You need to upload a picture',
+                    style: TextStyle(color: Colors.red),
+                    textAlign: TextAlign.left,
+                  ) ,
+                ):
+                SizedBox.shrink();
               }
-            },
-          );
-        },
-        separatorBuilder: (BuildContext context, int index){
-          return const SizedBox(width: 10.0,);
-        },
-//        children: <Widget>[
-//          StreamBuilder(
-//            stream: widget.bloc.pic,
-//            builder: (context, snapshot1) {
-//              if (!snapshot1.hasData) {
-//                return dottedBorder();
-//              } else {
-//                return Image(image: FileImage(snapshot1.data));
-//              }
-//            },
-//          ),
-//          SizedBox(
-//            width: 10.0,
-//          ),
-//
-//          SizedBox(
-//            width: 10.0,
-//          ),
-//
-//        ],
+          )
+        ],
       ),
-
     );
-
-//   ImagePicker.pickImage(source: ImageSource.camera);
   }
 
   Widget titleW(ItemBloc bloc) {
@@ -167,24 +188,24 @@ class LendScreenState extends State<LendScreen> {
         borderType: BorderType.RRect,
         radius: Radius.circular(12),
         strokeWidth: 1,
-        child: InkWell(
+        child: new InkWell(
           onTap: () {
             _showChoice(context);
           },
-          child: Container(
+          child: new Container(
               height: 200,
               width: 200,
               child: Center(
-                child: Ink(
-                  decoration: const ShapeDecoration(
-                      color: Colors.blue, shape: CircleBorder()),
-                  child: IconButton(
-                    icon: Icon(Icons.add),
+                child: MaterialButton(
+                  shape: CircleBorder(),
+                  child: Icon(
+                    Icons.add,
                     color: Colors.white,
-                    onPressed: () {
-                      _showChoice(context);
-                    },
                   ),
+                  color: Colors.blue,
+                  onPressed: () {
+                    _showChoice(context);
+                  },
                 ),
               )),
         ));
@@ -197,18 +218,47 @@ class LendScreenState extends State<LendScreen> {
           title: new Text("Add photo"),
           children: <Widget>[
             new SimpleDialogOption(
-              child: Text(
-                "Choose from device",
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text("Choose from device"),
               ),
               onPressed: () {
                 widget.bloc.getImage();
                 Navigator.pop(context);
-                },
+              },
             ),
             new SimpleDialogOption(
-              child: Text("Take photo"),
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text("Take photo"),
+              ),
               onPressed: () {
                 widget.bloc.takeImage();
+                Navigator.pop(context);
+              },
+            )
+          ],
+        ));
+  }
+
+  void _delete(context, index) {
+    showDialog(
+        context: context,
+        child: new AlertDialog(
+          title: Text('Confrim delete'),
+          content: Text('Are you sure you want to delete the image?'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            FlatButton(
+              child: Text('Delete'),
+              onPressed: () {
+                widget.bloc.deleteImage(index);
+                Navigator.pop(context);
               },
             )
           ],

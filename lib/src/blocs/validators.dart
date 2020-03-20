@@ -74,4 +74,14 @@ class Validators {
   );
 
 
+  final validatePicList = StreamTransformer<List<File>, List<File>>.fromHandlers(
+      handleData: (des, sink) {
+        if (des==null || des.length==0){
+          sink.addError('Please attach a picture');
+        } else {
+          sink.add(des);
+        }
+      }
+  );
+
 }
