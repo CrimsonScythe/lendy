@@ -52,6 +52,9 @@ class Validators {
 
   final validateDes = StreamTransformer<String, String>.fromHandlers(
       handleData: (des, sink) {
+
+        //TODO: handle the case where there is a new line
+
         if (des.length > 0){
           sink.add(des);
         } else {

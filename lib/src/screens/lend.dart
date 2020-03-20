@@ -23,22 +23,24 @@ class LendScreenState extends State<LendScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text("Add item"),
       ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            imgW(widget.bloc),
-            titleW(widget.bloc),
-            desW(widget.bloc),
+      body: SingleChildScrollView(
+        child: Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              imgW(widget.bloc),
+              titleW(widget.bloc),
+              desW(widget.bloc),
 //            tagsW(widget.bloc),
-            SizedBox(
-              height: 10.0,
-            ),
-            uploadB(widget.bloc, context)
-          ],
+              SizedBox(
+                height: 10.0,
+              ),
+              uploadB(widget.bloc, context)
+            ],
+          ),
         ),
       ),
       floatingActionButton: StreamBuilder(
@@ -46,13 +48,9 @@ class LendScreenState extends State<LendScreen> {
         builder: (context, snapshot) {
           return FloatingActionButton.extended(
             backgroundColor: !snapshot.hasData || !snapshot.data ? Colors.grey : Colors.blue,
-//            onPressed: !snapshot.hasData || !snapshot.data ? null : () {
-//              print("pressed");
-//            },
-              onPressed: () {
-
-//                widget.bloc.changeTitle('');
-              },
+            onPressed: !snapshot.hasData || !snapshot.data ? null : () {
+              print("pressed");
+            },
               icon: Icon(Icons.navigate_next),
             label: Text('Next'),
           );
