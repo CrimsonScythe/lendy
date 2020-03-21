@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'dart:math';
-
 class Validators {
 
   final validateEmail = StreamTransformer<String, String>.fromHandlers(
@@ -85,6 +83,12 @@ class Validators {
           sink.add(des);
         }
       }
+  );
+
+  final validateDrop = StreamTransformer<String, String>.fromHandlers(
+    handleData: (drop, sink) {
+      sink.add(drop);
+    }
   );
 
 }

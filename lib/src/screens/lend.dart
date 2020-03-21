@@ -32,6 +32,7 @@ class LendScreenState extends State<LendScreen> {
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               imgW(widget.bloc),
+              catW(widget.bloc),
               titleW(widget.bloc),
               desW(widget.bloc),
 //            tagsW(widget.bloc),
@@ -64,6 +65,8 @@ class LendScreenState extends State<LendScreen> {
     widget.bloc.dispose();
     super.dispose();
   }
+
+
 
   Widget imgW(bloc) {
     return Container(
@@ -137,6 +140,35 @@ class LendScreenState extends State<LendScreen> {
           )
         ],
       ),
+    );
+  }
+
+  Widget catW(ItemBloc bloc) {
+    String defaultValue = '';
+    List<String> cats = ['Choose Category', 'Photography',
+      'Drones', 'Video Games and Consoles', 'Clothes and Bags', 'Sports',
+      'Household Items', 'Laptops and Accessories', 'Phones and Tablets',
+      'TVs and Monitors', 'Kids and Baby Items', 'Music and Accessories',
+      'Travel Accessories', 'Books', 'Others'];
+    return StreamBuilder(
+        stream: bloc.drop,
+        builder: (context, snapshot){
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: DropdownButton<String>(
+              onChanged: bloc.changeDrop,
+              value: !snapshot.hasData ? cats[0]: snapshot.data,
+              icon: Icon(Icons.arrow_drop_down),
+//      onChanged: widget.bloc.photosList,
+              items: cats.map((String cat){
+                return new DropdownMenuItem<String>(
+                  value: cat,
+                  child: new Text(cat),
+                );
+              }).toList(),
+            ),
+          );
+        }
     );
   }
 

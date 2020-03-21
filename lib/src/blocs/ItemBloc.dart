@@ -13,7 +13,7 @@ class ItemBloc extends Object with Validators {
   final _title = BehaviorSubject<String>.seeded('');
   final _des = BehaviorSubject<String>.seeded('');
   final _pic = BehaviorSubject<File>();
-
+  final _drop = BehaviorSubject<String>();
   final _piclist = BehaviorSubject<List<File>>();
 
   Stream<String> get title => _title.stream.transform(validateTitle)
@@ -23,6 +23,8 @@ class ItemBloc extends Object with Validators {
 //
 //    }
   });
+
+  Stream<String> get drop => _drop.stream.transform(validateDrop);
 
   Stream<String> get des => _des.stream.transform(validateDes)
   .doOnData((String c){
@@ -40,18 +42,15 @@ class ItemBloc extends Object with Validators {
   Function(String) get changeTitle => _title.sink.add;
   Function(String) get changeDes => _des.sink.add;
 
+  Function(String) get changeDrop => _drop.sink.add;
 
   Function(File) get addPic => _pic.sink.add;
 
 
-  Stream<bool> get nextValid => Rx.combineLatest3(title, des, picList, (e,r,p) {
-//    print('CORONA');
-//    print();
-//    || e.toString().length==0 || r.toString().length==0
+  Stream<bool> get nextValid => Rx.combineLatest4(title, des, picList,drop, (e,r,p,d) {
 
-    print(_des.value.isEmpty);
-
-    if (photosList.length==0 || _des.value.isEmpty || _title.value.isEmpty){
+    if (photosList.length==0 || _des.value.isEmpty || _title.value.isEmpty
+      || _drop.value=='Choose Category'){
       return false;
     } else {
       return true;
@@ -94,5 +93,7 @@ class ItemBloc extends Object with Validators {
     _pic.close();
     _piclist.drain();
     _piclist.close();
+    _drop.drain();
+    _drop.close();
   }
 }
