@@ -7,8 +7,6 @@ import 'package:rxdart/rxdart.dart';
 class ItemBloc extends Object with Validators {
 
 
-  final List<File> photosList = <File>[];
-
   final _repository = Repository();
   final _title = BehaviorSubject<String>.seeded('');
   final _des = BehaviorSubject<String>.seeded('');
@@ -49,7 +47,7 @@ class ItemBloc extends Object with Validators {
 
   Stream<bool> get nextValid => Rx.combineLatest4(title, des, picList,drop, (e,r,p,d) {
 
-    if (photosList.length==0 || _des.value.isEmpty || _title.value.isEmpty
+    if (_repository.photosList.length==0 || _des.value.isEmpty || _title.value.isEmpty
       || _drop.value=='Choose Category'){
       return false;
     } else {
@@ -60,8 +58,8 @@ class ItemBloc extends Object with Validators {
   void getImage() {
     _repository.getImage().then((value) {
       if (value!=null){ // only add image if not null
-        photosList.add(value);
-        _piclist.sink.add(photosList);
+        _repository.photosList.add(value);
+        _piclist.sink.add(_repository.photosList);
       }
     });
   }
@@ -69,19 +67,19 @@ class ItemBloc extends Object with Validators {
   void takeImage() {
     _repository.takeImage().then((value) {
       if (value!=null) {
-        photosList.add(value);
-        _piclist.sink.add(photosList);
+        _repository.photosList.add(value);
+        _piclist.sink.add(_repository.photosList);
       }
     });
   }
 
   void deleteImage(index) {
-    print("length"+ photosList.length.toString());
-    photosList.removeAt(index);
+//    print("length"+ photosList.length.toString());
+    _repository.photosList.removeAt(index);
 //    if (photosList.length==0){
 //      _piclist.sink.addError("ERROR");
 //    }
-    _piclist.sink.add(photosList);
+    _piclist.sink.add(_repository.photosList);
   }
 
   dispose() async {

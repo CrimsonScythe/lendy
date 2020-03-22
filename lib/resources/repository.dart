@@ -9,6 +9,9 @@ class Repository {
 
   static final Repository _repository = Repository._internal();
 
+  final List<File> photosList = <File>[];
+
+
   factory Repository(){
     return _repository;
   }
