@@ -1,10 +1,11 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lendy/resources/bloc_provider.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
 
 class LendScreen extends StatefulWidget {
-  final ItemBloc bloc = ItemBloc();
+
 
   @override
   State<StatefulWidget> createState() {
@@ -14,14 +15,20 @@ class LendScreen extends StatefulWidget {
 
 class LendScreenState extends State<LendScreen> {
   var itemCount = 1;
+  ItemBloc bloc;
 
   @override
   void initState() {
     super.initState();
+
   }
 
   @override
   Widget build(BuildContext context) {
+
+    bloc  = BlocProvider.of(context);
+//    bloc = BlocProvider.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Add item"),
@@ -31,25 +38,29 @@ class LendScreenState extends State<LendScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              imgW(widget.bloc),
-              catW(widget.bloc),
-              titleW(widget.bloc),
-              desW(widget.bloc),
-//            tagsW(widget.bloc),
+              imgW(bloc),
+              catW(bloc),
+              titleW(bloc),
+              desW(bloc),
+//            tagsW(bloc),
               SizedBox(
                 height: 10.0,
               ),
-              uploadB(widget.bloc, context)
+              uploadB(bloc, context)
             ],
           ),
         ),
       ),
       floatingActionButton: StreamBuilder(
-        stream: widget.bloc.nextValid,
+        stream: bloc.nextValid,
         builder: (context, snapshot) {
           return FloatingActionButton.extended(
             backgroundColor: !snapshot.hasData || !snapshot.data ? Colors.grey : Colors.blue,
-            onPressed: !snapshot.hasData || !snapshot.data ? null : () {
+            //TODO: commented out for debugging purpooses
+//            onPressed: !snapshot.hasData || !snapshot.data ? null : () {
+//              navNext();
+//            },
+            onPressed: () {
               navNext();
             },
               icon: Icon(Icons.navigate_next),
@@ -62,13 +73,16 @@ class LendScreenState extends State<LendScreen> {
 
   @override
   void dispose() {
-    widget.bloc.dispose();
+    // :TODO should dispose here or later?
+//    bloc.dispose();
+    print("CALLED 111");
+    bloc.dispose();
     super.dispose();
   }
 
 
 
-  Widget imgW(bloc) {
+  Widget imgW(ItemBloc bloc) {
     return Container(
       padding: EdgeInsets.all(8.0),
       height: 200,
@@ -77,7 +91,7 @@ class LendScreenState extends State<LendScreen> {
         children: <Widget>[
           Expanded(
             child: StreamBuilder(
-              stream: widget.bloc.picList,
+              stream: bloc.picList,
               builder: (context, snapshot1) {
                 return ListView.separated(
                     scrollDirection: Axis.horizontal,
@@ -124,7 +138,7 @@ class LendScreenState extends State<LendScreen> {
           ),
 
           StreamBuilder(
-              stream: widget.bloc.picList,
+              stream: bloc.picList,
               builder: (context, snapshot) {
                 return snapshot.data == null || snapshot.hasError ?
                 Align(
@@ -157,9 +171,9 @@ class LendScreenState extends State<LendScreen> {
             alignment: Alignment.centerLeft,
             child: DropdownButton<String>(
               onChanged: bloc.changeDrop,
-              value: !snapshot.hasData ? cats[0]: snapshot.data,
+              value: !snapshot.hasData || snapshot.data==null ? cats[0]: snapshot.data,
               icon: Icon(Icons.arrow_drop_down),
-//      onChanged: widget.bloc.photosList,
+//      onChanged: bloc.photosList,
               items: cats.map((String cat){
                 return new DropdownMenuItem<String>(
                   value: cat,
@@ -253,7 +267,7 @@ class LendScreenState extends State<LendScreen> {
                 child: Text("Choose from device"),
               ),
               onPressed: () {
-                widget.bloc.getImage();
+                bloc.getImage();
                 Navigator.pop(context);
               },
             ),
@@ -263,7 +277,7 @@ class LendScreenState extends State<LendScreen> {
                 child: Text("Take photo"),
               ),
               onPressed: () {
-                widget.bloc.takeImage();
+                bloc.takeImage();
                 Navigator.pop(context);
               },
             )
@@ -287,7 +301,7 @@ class LendScreenState extends State<LendScreen> {
             FlatButton(
               child: Text('Delete'),
               onPressed: () {
-                widget.bloc.deleteImage(index);
+                bloc.deleteImage(index);
                 Navigator.pop(context);
               },
             )

@@ -8,8 +8,9 @@ import 'package:lendy/resources/image_picker_provider.dart';
 class Repository {
 
   static final Repository _repository = Repository._internal();
-
-  final List<File> photosList = <File>[];
+//
+//  final List<File> photosList = <File>[];
+//  final List<File> photosList = <File>[];
 
 
   factory Repository(){
