@@ -17,11 +17,11 @@ class PostsBloc{
   void upload(pID) {
     print(_repository.user_ID);
     _showProgress.sink.add(true);
-    _repository
-    .uploadPic(_repository.user_ID, pID)
-    .then((value) {
-      _showProgress.sink.add(false);
-    });
+//    _repository
+//    .uploadPic(_repository.user_ID, pID)
+//    .then((value) {
+//      _showProgress.sink.add(false);
+//    });
   }
 
 

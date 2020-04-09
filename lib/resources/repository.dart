@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:lendy/resources/firestore_provider.dart';
 import 'package:lendy/resources/image_picker_provider.dart';
 
@@ -24,9 +25,17 @@ class Repository {
 
   String userID;
 
-  Future<DocumentReference> uploadPic(uID, pID) =>
-      _firestoreProvider.uploadPic(uID, pID);
+//  Future<DocumentReference> uploadPic(uID, pID) =>
+//      _firestoreProvider.uploadPic(uID, pID);
 
+  Future<DocumentReference> uploadItem(uID,
+      cat, title, des, daily, weekly, monthly, depo) =>
+
+    _firestoreProvider.uploadItem(uID,
+        cat, title, des, daily, weekly, monthly, depo);
+
+  List<Future> uploadImage(uID, photos) =>
+      _firestoreProvider.uploadImage(uID, photos);
 
   Future<void> addUser(uID) =>
       _firestoreProvider.addUser(uID);

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:lendy/resources/bloc_provider.dart';
 import 'package:lendy/resources/repository.dart';
@@ -21,7 +23,12 @@ class ItemBloc extends Object with Validators {
   final _monthly = BehaviorSubject<String>();
   final _deposit = BehaviorSubject<String>();
 
+  final _showProgress = BehaviorSubject<bool>();
 
+  final _firestore = BehaviorSubject<bool>();
+  final _cloudstore = BehaviorSubject<bool>();
+
+  final _uploadComplete = BehaviorSubject<bool>();
 
   Stream<String> get daily => _daily.stream
   .doOnData((String c){
@@ -51,6 +58,9 @@ class ItemBloc extends Object with Validators {
 //    }
   });
 
+  Stream<bool> get firestore => _firestore.stream;
+  Stream<bool> get cloudstore => _cloudstore.stream;
+
   Stream<String> get drop => _drop.stream.transform(validateDrop);
 
   Stream<String> get des => _des.stream.transform(validateDes)
@@ -79,6 +89,7 @@ class ItemBloc extends Object with Validators {
   Function(String) get changeDeposit => _deposit.sink.add;
 
 
+
   Stream<bool> get nextValid => Rx.combineLatest4(title, des, picList,drop, (e,r,p,d) {
 
     if (photosList.length==0 || _des.value.isEmpty || _title.value.isEmpty
@@ -90,6 +101,59 @@ class ItemBloc extends Object with Validators {
 
 
   });
+
+//  This stream should combine firestore and cloud storage tasks and return true,
+//  only when both are finished with their tasks
+  Stream<bool> get showProgress => _showProgress.stream;
+//  Stream<bool> get showProgress => Rx.combineLatest2(firestore, cloudstore, (f,c) {
+//    return (f==true && c==true) ? true : false;
+//  });
+
+
+  Stream<bool> get uploadComplete => Rx.combineLatest2(firestore, cloudstore, (f, c) {
+    if (f==true && c==true){
+      return true;
+    } else {
+      return false;
+    }
+
+  });
+
+  void uploadItem() {
+//    print(_repository.user_ID);
+
+  
+    _showProgress.sink.add(true);
+    var future1 = _repository
+        .uploadItem(_repository.user_ID, _drop.value, _title.value, _des.value, _daily.value,
+    _weekly.value, _monthly.value, _deposit.value)
+    // TODO: MOST IMPORTANT By design, connection state should be check on the homescreen because firebase
+    // TODO: does not return an error
+        .then((value) {
+
+//          //:TODO check for errors here?
+//          // add value to sink
+          _firestore.sink.add(true);
+          if (true)
+            _showProgress.sink.add(false);
+//          //:TODO remember to change this
+////      _showProgress.sink.add(false);
+    })
+    .catchError((err){
+      print("error");
+    });
+
+    var futureList = _repository.uploadImage(_repository.user_ID, photosList);
+
+    Future.wait(futureList)
+    .then((val){
+      //: TODO check for errors here?
+      _cloudstore.sink.add(true);
+    });
+
+
+
+  }
 
   Stream<bool> get post => Rx.combineLatest4(daily, weekly, monthly, deposit, (d,w,m,de){
 
@@ -134,6 +198,14 @@ class ItemBloc extends Object with Validators {
     _piclist.sink.add(photosList);
   }
 
+  reset() {
+    _daily.drain();
+    _weekly.drain();
+    _monthly.drain();
+    _deposit.drain();
+    _showProgress.drain();
+  }
+
   dispose() async {
     // TODO: call close somewhere !
     print('CALLED 222');
@@ -149,5 +221,10 @@ class ItemBloc extends Object with Validators {
     _drop.value=null;
     _drop.drain();
 //    _drop.close();
+    _daily.drain();
+    _weekly.drain();
+    _monthly.drain();
+    _deposit.drain();
+    _showProgress.drain();
   }
 }

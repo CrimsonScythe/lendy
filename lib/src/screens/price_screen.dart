@@ -13,9 +13,6 @@ class PriceScreen extends StatefulWidget {
 }
 
 class PriceScreenState extends State<PriceScreen> {
-
-
-
   ItemBloc bloc;
   var dailyCon = new MoneyMaskedTextController(
     initialValue: 1,
@@ -34,7 +31,6 @@ class PriceScreenState extends State<PriceScreen> {
     precision: 0,
     decimalSeparator: '',
   );
-
 
   @override
   void initState() {
@@ -55,59 +51,123 @@ class PriceScreenState extends State<PriceScreen> {
     bloc = BlocProvider.of(context);
 //    assert (bloc.photosList.isNotEmpty);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Set pricing'),
-      ),
-      body: Container(
-          child: Column(
-        children: <Widget>[
-          SizedBox(
-            height: 10.0,
-          ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: dW(bloc),
-                ),
-                SizedBox(
-                  width: 8.0,
-                ),
-                Expanded(
-                  child: wW(bloc),
-                ),
-                SizedBox(
-                  width: 8.0,
-                ),
-                Expanded(
-                  child: mW(bloc),
-                ),
-              ],
+    return new WillPopScope(
+      onWillPop: () {
+        bloc.reset();
+        Navigator.pop(context);
+        return Future.value(false);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Set pricing'),
+        ),
+        body: Container(
+            child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 10.0,
             ),
-          ),
-          Column(
-            children: <Widget>[depW(bloc), Text('Type 0 if no deposit')],
-          ),
-          StreamBuilder(
-              stream: bloc.post,
-              builder: (context, snapshot) {
-                return RaisedButton(
-                    onPressed: !snapshot.hasData || snapshot.hasError || !snapshot.data ? null : () {},
-                    child: Text('Post')
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: dW(bloc),
+                  ),
+                  SizedBox(
+                    width: 8.0,
+                  ),
+                  Expanded(
+                    child: wW(bloc),
+                  ),
+                  SizedBox(
+                    width: 8.0,
+                  ),
+                  Expanded(
+                    child: mW(bloc),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              children: <Widget>[depW(bloc), Text('Type 0 if no deposit')],
+            ),
+            StreamBuilder(
+                stream: bloc.post,
+                builder: (context, snapshot) {
+                  return RaisedButton(
+                      onPressed: !snapshot.hasData ||
+                              snapshot.hasError ||
+                              !snapshot.data
+                          ? null
+                          : () {},
+                      child: Text('Post'));
+                })
+          ],
+        )),
+        floatingActionButton: StreamBuilder(
+          stream: bloc.post,
+          builder: (context, snapshot) {
+            return StreamBuilder(
+              stream: bloc.showProgress,
+              builder: (context1, snapshot1) {
+                if (snapshot1.hasData && snapshot1.data) {
+                  return FloatingActionButton.extended(
+                    backgroundColor: Colors.grey,
+                    onPressed: null,
+                    label: Text('Posting...'),
+                    icon: SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3.0,
+                      ),
+                    ),
+                  );
+                }
+
+                return FloatingActionButton.extended(
+                  backgroundColor: !snapshot.hasData || !snapshot.data
+                      ? Colors.grey
+                      : Colors.blue,
+                  onPressed: !snapshot.hasData || !snapshot.data
+                      ? null
+                      : () {
+                          post();
+                        },
+                  label: Text('Post'),
+                  icon: Icon(Icons.send),
                 );
-              }
-          )
-        ],
-      )),
+              },
+            );
+          },
+        ),
+      ),
     );
+  }
+
+  void post() async {
+    //:TODO close this somewhere, somehow??
+    bloc.uploadComplete.listen((val){
+      print("THE UPLOAD STATUS IS" + val.toString());
+      // Upload status true
+      if (val){
+
+      }
+
+    });
+
+
+    bloc.uploadItem();
   }
 
   @override
   void dispose() {
 //    bloc.dispose();
     super.dispose();
+
+    //:TODO make sure this works
+    bloc.dispose();
   }
 
   Widget dW(ItemBloc bloc) {
@@ -146,14 +206,12 @@ class PriceScreenState extends State<PriceScreen> {
       stream: bloc.weekly,
       builder: (context, snapshot) {
 //        weeklyCon.text = snapshot.data;
-      if (snapshot.hasData){
-      weeklyCon.value = TextEditingValue(
-        text: snapshot.data,
-        selection: TextSelection.fromPosition(
-          TextPosition(offset: snapshot.data.toString().length)
-        )
-      );
-      }
+        if (snapshot.hasData) {
+          weeklyCon.value = TextEditingValue(
+              text: snapshot.data,
+              selection: TextSelection.fromPosition(
+                  TextPosition(offset: snapshot.data.toString().length)));
+        }
         return TextField(
           controller: weeklyCon,
 //          onChanged: bloc.changeWeekly,
@@ -185,13 +243,11 @@ class PriceScreenState extends State<PriceScreen> {
       stream: bloc.monthly,
       builder: (context, snapshot) {
 //        monthlyCon.text = snapshot.data;
-        if (snapshot.hasData){
+        if (snapshot.hasData) {
           monthlyCon.value = TextEditingValue(
               text: snapshot.data,
               selection: TextSelection.fromPosition(
-                  TextPosition(offset: snapshot.data.toString().length)
-              )
-          );
+                  TextPosition(offset: snapshot.data.toString().length)));
         }
         return TextField(
           controller: monthlyCon,

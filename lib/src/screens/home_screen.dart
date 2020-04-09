@@ -1,13 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:lendy/resources/bloc_provider.dart';
+import 'package:lendy/src/blocs/HomeBloc.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
 import '../blocs/PostsBloc.dart';
 
 class HomeScreen extends StatefulWidget {
-
-
   @override
   State<StatefulWidget> createState() {
     return HomeScreenState();
@@ -17,61 +13,153 @@ class HomeScreen extends StatefulWidget {
 
 }
 
-
 class HomeScreenState extends State<HomeScreen> {
+  HomeBloc _homeBloc;
 
-  PostsBloc _postsBloc = new PostsBloc();
+  ItemBloc bloc = new ItemBloc();
 
-  ItemBloc bloc= new ItemBloc();
+//  TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeBloc = new HomeBloc();
+//    _tabController = new TabController(length: 2, vsync: );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _homeBloc.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: new AppBar(title: Text("Home"), ),
-      body: Center(
-
-              child: Column(
-                children: <Widget>[
-                  RaisedButton(
-                      child: Text("logout"),
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-                      }
-                  ),
-                  RaisedButton(
-                      child: Text("submit"),
-                      onPressed: () async {
-                        _postsBloc.upload("picID");
-                      }
-                  ),
-                  StreamBuilder(
-                    stream: _postsBloc.showProgress,
-                    builder: (context, snapshot){
-                      if (!snapshot.hasData){
-                        return Container();
-                      }
-                      if (snapshot.hasData && snapshot.data){
-                        return CircularProgressIndicator();
-                      } else {
-                        if (!snapshot.data){
-                          return Container();
-                        }
-                      }
-                      return Container();
-                    },
-                  )
-                ],
-              ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(context).pushNamed('/lend');
-        }, label: Text('Lend'), icon: Icon(Icons.add),),
+    return StreamBuilder(
+        stream: _homeBloc.itemStream,
+        initialData: _homeBloc.defaultItem,
+        builder: (context, snapshot) {
+          return Scaffold(
+            appBar: new AppBar(
+              title: Text("Home"),
+            ),
+            body: _navChooser(snapshot.data),
+              bottomNavigationBar:
+                  stream: _homeBloc.itemStream,
+                  initialData: _homeBloc.defaultItem,
+                  builder: (context, snapshot) {
+                    return BottomNavigationBar(
+                      items: const <BottomNavigationBarItem>[
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.explore), title: Text('Explore')),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.list), title: Text('Listings')),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.chat), title: Text('Chats')),
+                        BottomNavigationBarItem(
+                            icon: Icon(Icons.person), title: Text('Profile'))
+                      ],
+                      currentIndex: snapshot.data.index,
+                      onTap: _homeBloc.onItemTapped,
+                      selectedItemColor: Colors.blue,
+                      unselectedItemColor: Colors.grey,
+                    );
+                  }
+          );
+        }
     );
-
-
+    return Scaffold(
+        appBar: new AppBar(
+          title: Text("Home"),
+        ),
+        body: StreamBuilder(
+          stream: _homeBloc.itemStream,
+          initialData: _homeBloc.defaultItem,
+          builder: (context, snapshot) {
+            switch (snapshot.data) {
+              case NavBarItem.EXPLORE:
+                return Text('EXPLORE');
+              case NavBarItem.LISTINGS:
+                return listings();
+              case NavBarItem.CHAT:
+                return Text('CHAT');
+              case NavBarItem.PROFILE:
+                return Text('PROFILE');
+//                hopefully we never get down to default
+              default:
+                return Center(child: Text('ERROR'));
+            }
+          },
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.of(context).pushNamed('/lend');
+          },
+          label: Text('Lend'),
+          icon: Icon(Icons.add),
+        ),
+        bottomNavigationBar: StreamBuilder(
+            stream: _homeBloc.itemStream,
+            initialData: _homeBloc.defaultItem,
+            builder: (context, snapshot) {
+              return BottomNavigationBar(
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.explore), title: Text('Explore')),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.list), title: Text('Listings')),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.chat), title: Text('Chats')),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.person), title: Text('Profile'))
+                ],
+                currentIndex: snapshot.data.index,
+                onTap: _homeBloc.onItemTapped,
+                selectedItemColor: Colors.blue,
+                unselectedItemColor: Colors.grey,
+              );
+            })
+    );
   }
 
+  Widget listings() {
+
+//    return DefaultTabController(
+//      length: 2,
+//      child: Scaffold(
+//        appBar: new AppBar(
+//          title: Text('Listings'),
+//          bottom: TabBar(
+//            tabs: [
+//              new Tab(
+//                text: 'lend',
+//              ),
+//              new Tab(
+//                text: 'borrow',
+//              )
+//            ],
+//          ),
+//        ),
+//        body: TabBarView(
+//          children: [new Text('lend'), new Text('borrow')],
+//        ),
+//      ),
+//    );
+  }
+
+  _navChooser(data) {
+    switch (data) {
+      case NavBarItem.EXPLORE:
+        return Text('EXPLORE');
+      case NavBarItem.LISTINGS:
+        return listings();
+      case NavBarItem.CHAT:
+        return Text('CHAT');
+      case NavBarItem.PROFILE:
+        return Text('PROFILE');
+//                hopefully we never get down to default
+      default:
+        return Center(child: Text('ERROR'));
+    }
+  }
 }
