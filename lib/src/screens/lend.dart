@@ -57,12 +57,12 @@ class LendScreenState extends State<LendScreen> {
           return FloatingActionButton.extended(
             backgroundColor: !snapshot.hasData || !snapshot.data ? Colors.grey : Colors.blue,
             //TODO: commented out for debugging purpooses
-//            onPressed: !snapshot.hasData || !snapshot.data ? null : () {
-//              navNext();
-//            },
-            onPressed: () {
+            onPressed: !snapshot.hasData || !snapshot.data ? null : () {
               navNext();
             },
+//            onPressed: () {
+//              navNext();
+//            },
               icon: Icon(Icons.navigate_next),
             label: Text('Next'),
           );

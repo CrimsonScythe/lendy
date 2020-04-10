@@ -60,4 +60,7 @@ class Repository {
 
 
 
+  Stream<QuerySnapshot> myList() =>
+      _firestoreProvider.myList(user_ID);
+
 }

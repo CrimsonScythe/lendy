@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lendy/src/blocs/HomeBloc.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
+import 'package:lendy/src/blocs/ListingsBloc.dart';
 import '../blocs/PostsBloc.dart';
+import 'borrowing_screen.dart';
+import 'lending_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -13,8 +16,11 @@ class HomeScreen extends StatefulWidget {
 
 }
 
-class HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  TabController _tabController;
   HomeBloc _homeBloc;
+  ListingsBloc _listingsBloc = new ListingsBloc();
 
   ItemBloc bloc = new ItemBloc();
 
@@ -23,6 +29,8 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = new TabController(length: 2, vsync: this);
+
     _homeBloc = new HomeBloc();
 //    _tabController = new TabController(length: 2, vsync: );
   }
@@ -40,126 +48,86 @@ class HomeScreenState extends State<HomeScreen> {
         initialData: _homeBloc.defaultItem,
         builder: (context, snapshot) {
           return Scaffold(
-            appBar: new AppBar(
-              title: Text("Home"),
-            ),
-            body: _navChooser(snapshot.data),
-              bottomNavigationBar:
-                  stream: _homeBloc.itemStream,
-                  initialData: _homeBloc.defaultItem,
-                  builder: (context, snapshot) {
-                    return BottomNavigationBar(
-                      items: const <BottomNavigationBarItem>[
-                        BottomNavigationBarItem(
-                            icon: Icon(Icons.explore), title: Text('Explore')),
-                        BottomNavigationBarItem(
-                            icon: Icon(Icons.list), title: Text('Listings')),
-                        BottomNavigationBarItem(
-                            icon: Icon(Icons.chat), title: Text('Chats')),
-                        BottomNavigationBarItem(
-                            icon: Icon(Icons.person), title: Text('Profile'))
+            appBar: snapshot.data.index == 1
+                ? AppBar(
+                    title: Text("Listings"),
+                    bottom: TabBar(
+                      tabs: [
+                        new Tab(
+                          text: 'lending',
+                        ),
+                        new Tab(
+                          text: 'borrowing',
+                        )
                       ],
-                      currentIndex: snapshot.data.index,
-                      onTap: _homeBloc.onItemTapped,
-                      selectedItemColor: Colors.blue,
-                      unselectedItemColor: Colors.grey,
-                    );
-                  }
+                      controller: _tabController,
+                    ),
+                  )
+                : AppBar(
+                    title: _nameChooser(snapshot.data),
+                  ),
+            body: snapshot.data.index == 1
+                ? TabBarView(
+                    children: [sLend(context, _listingsBloc), sBorrow(context, _listingsBloc)],
+                    controller: _tabController,
+                  )
+                : _navChooser(snapshot.data),
+            bottomNavigationBar: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.explore), title: Text('Explore')),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.list), title: Text('Listings')),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.chat), title: Text('Chats')),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.person), title: Text('Profile'))
+              ],
+              currentIndex: snapshot.data.index,
+              onTap: _homeBloc.onItemTapped,
+              selectedItemColor: Colors.blue,
+              unselectedItemColor: Colors.grey,
+            ),
           );
-        }
-    );
-    return Scaffold(
-        appBar: new AppBar(
-          title: Text("Home"),
-        ),
-        body: StreamBuilder(
-          stream: _homeBloc.itemStream,
-          initialData: _homeBloc.defaultItem,
-          builder: (context, snapshot) {
-            switch (snapshot.data) {
-              case NavBarItem.EXPLORE:
-                return Text('EXPLORE');
-              case NavBarItem.LISTINGS:
-                return listings();
-              case NavBarItem.CHAT:
-                return Text('CHAT');
-              case NavBarItem.PROFILE:
-                return Text('PROFILE');
-//                hopefully we never get down to default
-              default:
-                return Center(child: Text('ERROR'));
-            }
-          },
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.of(context).pushNamed('/lend');
-          },
-          label: Text('Lend'),
-          icon: Icon(Icons.add),
-        ),
-        bottomNavigationBar: StreamBuilder(
-            stream: _homeBloc.itemStream,
-            initialData: _homeBloc.defaultItem,
-            builder: (context, snapshot) {
-              return BottomNavigationBar(
-                items: const <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.explore), title: Text('Explore')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.list), title: Text('Listings')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.chat), title: Text('Chats')),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.person), title: Text('Profile'))
-                ],
-                currentIndex: snapshot.data.index,
-                onTap: _homeBloc.onItemTapped,
-                selectedItemColor: Colors.blue,
-                unselectedItemColor: Colors.grey,
-              );
-            })
-    );
+        });
   }
 
-  Widget listings() {
-
-//    return DefaultTabController(
-//      length: 2,
-//      child: Scaffold(
-//        appBar: new AppBar(
-//          title: Text('Listings'),
-//          bottom: TabBar(
-//            tabs: [
-//              new Tab(
-//                text: 'lend',
-//              ),
-//              new Tab(
-//                text: 'borrow',
-//              )
-//            ],
-//          ),
-//        ),
-//        body: TabBarView(
-//          children: [new Text('lend'), new Text('borrow')],
-//        ),
-//      ),
-//    );
-  }
-
-  _navChooser(data) {
+  Widget _nameChooser(data) {
     switch (data) {
       case NavBarItem.EXPLORE:
-        return Text('EXPLORE');
-      case NavBarItem.LISTINGS:
-        return listings();
+        return Text('Explore');
+//    case NavBarItem.LISTINGS:
+//      return listings();
       case NavBarItem.CHAT:
-        return Text('CHAT');
+        return Text('Chat');
       case NavBarItem.PROFILE:
-        return Text('PROFILE');
+        return Text('Profile');
 //                hopefully we never get down to default
       default:
-        return Center(child: Text('ERROR'));
+        return Text('ERROR');
     }
+  }
+
+}
+
+
+Widget listings() {
+  return Text("DDD");
+
+}
+
+_navChooser(data) {
+  switch (data) {
+    case NavBarItem.EXPLORE:
+      return Text('EXPLORE');
+//    case NavBarItem.LISTINGS:
+//      return listings();
+    case NavBarItem.CHAT:
+      return Text('CHAT');
+    case NavBarItem.PROFILE:
+      return Text('PROFILE');
+//                hopefully we never get down to default
+    default:
+      return Center(child: Text('ERROR'));
   }
 }

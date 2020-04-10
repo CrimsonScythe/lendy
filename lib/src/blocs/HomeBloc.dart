@@ -10,6 +10,9 @@ class HomeBloc extends Object with Validators {
 
  Stream<NavBarItem> get itemStream => _navBarController.stream;
 
+ 
+
+
  void onItemTapped(int i){
    switch (i) {
      case 0:

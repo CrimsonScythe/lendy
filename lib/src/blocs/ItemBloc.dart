@@ -122,6 +122,7 @@ class ItemBloc extends Object with Validators {
   void uploadItem() {
 //    print(_repository.user_ID);
 
+  // TODO: upload all images. get downloadurls create one doc with urls
   
     _showProgress.sink.add(true);
     var future1 = _repository

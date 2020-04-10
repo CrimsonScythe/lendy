@@ -8,6 +8,11 @@ class Item {
   final int _weekly;
   final int depo;
 
-  Item(this._category, this._title, this._des, this._daily, this._monthly, this._weekly, this.depo);
+  Item(this._category,
+      this._title,
+      this._des, this._daily, this._monthly, this._weekly, this.depo);
+
+  String get title => _title;
+  int get daily => _daily;
 
 }

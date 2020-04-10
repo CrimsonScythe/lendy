@@ -28,7 +28,7 @@ class FirestoreProvider {
 //    var list = List<Future<StorageTaskSnapshot>>();
     var fut = <Future>[];
     for (var i = 0; i < photos.length; i++){
-      fut.add(_firebaseStorage.ref().child('images/' + i.toString() + uID + new DateTime.now().millisecondsSinceEpoch.toString()).putFile(photos[0]).onComplete);
+      fut.add(_firebaseStorage.ref().child('images/' + i.toString() + uID + new DateTime.now().millisecondsSinceEpoch.toString()).putFile(photos[i]).onComplete);
 
 //      _firebaseStorage.ref().child('images/' + i.toString() + uID + new DateTime.now().millisecondsSinceEpoch.toString()).putFile(photos[0]).onComplete;
     }
@@ -68,6 +68,12 @@ class FirestoreProvider {
     return _firestore.collection("users").document(uID)
         .setData(dat);
 //        .setData(new Map<String, Object>{"ctime": Timestamp.now()})
+  }
+
+
+
+  Stream<QuerySnapshot> myList(uID) {
+     return _firestore.collection('users').document(uID).collection('lend').getDocuments().asStream();
   }
 
 }
