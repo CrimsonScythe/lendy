@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:lendy/src/blocs/HomeBloc.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
 import 'package:lendy/src/blocs/ListingsBloc.dart';
@@ -87,6 +88,20 @@ class HomeScreenState extends State<HomeScreen>
               onTap: _homeBloc.onItemTapped,
               selectedItemColor: Colors.blue,
               unselectedItemColor: Colors.grey,
+            ),
+            floatingActionButton: StreamBuilder(
+              stream: _listingsBloc.fabStream,
+              builder: (context, snapshot){
+                if (snapshot.hasData && snapshot.data) {
+                  return FloatingActionButton.extended(
+                      onPressed: () => Navigator.of(context).pushNamed('/lend'),
+                      icon: Icon(Icons.add),
+                      label: Text("Add item")
+                  );
+                } else {
+                  return Container();
+                }
+              },
             ),
           );
         });

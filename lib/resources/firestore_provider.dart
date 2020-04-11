@@ -36,8 +36,17 @@ class FirestoreProvider {
     return fut;
   }
 
+  List<Future> downloadURLs(list) {
+     var fut = <Future>[];
+
+     list.forEach((f){
+       fut.add(f.ref.getDownloadURL());
+     });
+     return fut;
+  }
+
   Future<DocumentReference> uploadItem(uID,
-      cat, title, des, daily, weekly, monthly, depo) {
+      cat, title, des, daily, weekly, monthly, depo, urls) {
 
     var loc = "DK";
 
@@ -54,6 +63,7 @@ class FirestoreProvider {
     dat['monthly'] = monthly;
     dat['depo'] = depo;
     dat['loc'] = loc;
+    dat['urls'] = urls;
     dat['time'] = DateTime.now();
 
     return _firestore.collection("users").document(uID).collection("lend")
@@ -71,9 +81,13 @@ class FirestoreProvider {
   }
 
 
+//
+//  Stream<QuerySnapshot> myList(uID) {
+//     return _firestore.collection('users').document(uID).collection('lend').getDocuments().asStream();
+//  }
 
   Stream<QuerySnapshot> myList(uID) {
-     return _firestore.collection('users').document(uID).collection('lend').getDocuments().asStream();
+    return _firestore.collection('users').document(uID).collection('lend').getDocuments().asStream();
   }
 
 }

@@ -8,10 +8,15 @@ class ListingsBloc extends Object with Validators {
 
   final _repository = Repository();
 
+  StreamController<bool> _fabStream = new StreamController();
+
+  Stream<bool> get fabStream => _fabStream.stream;
 
   Stream<QuerySnapshot> myList() {
     return _repository.myList();
   }
+
+
 
   List mapToList(List<DocumentSnapshot> docList) {
     List<Item> myList = [];
@@ -24,10 +29,19 @@ class ListingsBloc extends Object with Validators {
             int.parse(document.data['daily']),
             int.parse(document.data['monthly']),
             int.parse(document.data['weekly']),
-            int.parse(document.data['depo'])
+            int.parse(document.data['depo']),
+          document.data['urls']
         ));
       });
     }
+
+    //we use this stream for dispalying FAB in homescreen
+    if (myList.isNotEmpty){
+      _fabStream.sink.add(true);
+    } else {
+      _fabStream.sink.add(false);
+    }
+
     return myList;
   }
 

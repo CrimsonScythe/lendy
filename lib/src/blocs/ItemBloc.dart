@@ -125,33 +125,56 @@ class ItemBloc extends Object with Validators {
   // TODO: upload all images. get downloadurls create one doc with urls
   
     _showProgress.sink.add(true);
-    var future1 = _repository
-        .uploadItem(_repository.user_ID, _drop.value, _title.value, _des.value, _daily.value,
-    _weekly.value, _monthly.value, _deposit.value)
-    // TODO: MOST IMPORTANT By design, connection state should be check on the homescreen because firebase
-    // TODO: does not return an error
-        .then((value) {
+    
+//    var future1 = _repository
+//        .uploadItem(_repository.user_ID, _drop.value, _title.value, _des.value, _daily.value,
+//    _weekly.value, _monthly.value, _deposit.value)
+//    // TODO: MOST IMPORTANT By design, connection state should be check on the homescreen because firebase
+//    // TODO: does not return an error
+//        .then((value) {
+////          //:TODO check for errors here?
+//          _firestore.sink.add(true);
+//          if (true)
+//            _showProgress.sink.add(false);
+//    })
+//    .catchError((err){
+//      print("error");
+//    });
 
+    // storage task first
+    var futureList = _repository.uploadImage(_repository.user_ID, photosList);
+    var downloadURLs = [];
+    Future.wait(futureList)
+    .then((storageTaskSnapList){
+      //: TODO check for errors here?
+      _cloudstore.sink.add(true);
+      // get URLs
+
+      var futureList2 = _repository.getDownloadURLs(storageTaskSnapList);
+      Future.wait(futureList2)
+      .then((urlList){
+
+        var future1 = _repository
+            .uploadItem(_repository.user_ID, _drop.value, _title.value, _des.value, _daily.value,
+            _weekly.value, _monthly.value, _deposit.value, urlList)
+        // TODO: MOST IMPORTANT By design, connection state should be check on the homescreen because firebase
+        // TODO: does not return an error
+            .then((value) {
 //          //:TODO check for errors here?
-//          // add value to sink
           _firestore.sink.add(true);
           if (true)
             _showProgress.sink.add(false);
-//          //:TODO remember to change this
-////      _showProgress.sink.add(false);
-    })
-    .catchError((err){
-      print("error");
+        })
+            .catchError((err){
+          print("error");
+        });
+
+//        print(urlList.runtimeType);
+//        print(urlList);
+
+      });
+
     });
-
-    var futureList = _repository.uploadImage(_repository.user_ID, photosList);
-
-    Future.wait(futureList)
-    .then((val){
-      //: TODO check for errors here?
-      _cloudstore.sink.add(true);
-    });
-
 
 
   }

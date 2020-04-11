@@ -92,17 +92,6 @@ class PriceScreenState extends State<PriceScreen> {
             Column(
               children: <Widget>[depW(bloc), Text('Type 0 if no deposit')],
             ),
-            StreamBuilder(
-                stream: bloc.post,
-                builder: (context, snapshot) {
-                  return RaisedButton(
-                      onPressed: !snapshot.hasData ||
-                              snapshot.hasError ||
-                              !snapshot.data
-                          ? null
-                          : () {},
-                      child: Text('Post'));
-                })
           ],
         )),
         floatingActionButton: StreamBuilder(

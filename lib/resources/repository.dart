@@ -29,10 +29,10 @@ class Repository {
 //      _firestoreProvider.uploadPic(uID, pID);
 
   Future<DocumentReference> uploadItem(uID,
-      cat, title, des, daily, weekly, monthly, depo) =>
+      cat, title, des, daily, weekly, monthly, depo, urls) =>
 
     _firestoreProvider.uploadItem(uID,
-        cat, title, des, daily, weekly, monthly, depo);
+        cat, title, des, daily, weekly, monthly, depo, urls);
 
   List<Future> uploadImage(uID, photos) =>
       _firestoreProvider.uploadImage(uID, photos);
@@ -42,6 +42,9 @@ class Repository {
 
   Future<FirebaseUser> getUser() async =>
       await FirebaseAuth.instance.currentUser();
+
+  List<Future> getDownloadURLs(list) =>
+    _firestoreProvider.downloadURLs(list);
 
   set user_ID(String id) {
     this.userID = id;
