@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,8 @@ import 'package:lendy/resources/bloc_provider.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
 
 class PriceScreen extends StatefulWidget {
+
+
   @override
   State<StatefulWidget> createState() {
     return PriceScreenState();
@@ -13,6 +16,8 @@ class PriceScreen extends StatefulWidget {
 }
 
 class PriceScreenState extends State<PriceScreen> {
+  StreamSubscription<bool> subscription;
+
   ItemBloc bloc;
   var dailyCon = new MoneyMaskedTextController(
     initialValue: 1,
@@ -36,6 +41,8 @@ class PriceScreenState extends State<PriceScreen> {
   void initState() {
     super.initState();
 
+
+
     //:TODO Remember to stop listening when disposed
     weeklyCon.addListener(() {
       bloc.changeWeekly(weeklyCon.text);
@@ -51,13 +58,7 @@ class PriceScreenState extends State<PriceScreen> {
     bloc = BlocProvider.of(context);
 //    assert (bloc.photosList.isNotEmpty);
 
-    return new WillPopScope(
-      onWillPop: () {
-        bloc.reset();
-        Navigator.pop(context);
-        return Future.value(false);
-      },
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: Text('Set pricing'),
         ),
@@ -100,6 +101,8 @@ class PriceScreenState extends State<PriceScreen> {
             return StreamBuilder(
               stream: bloc.showProgress,
               builder: (context1, snapshot1) {
+
+
                 if (snapshot1.hasData && snapshot1.data) {
                   return FloatingActionButton.extended(
                     backgroundColor: Colors.grey,
@@ -115,6 +118,7 @@ class PriceScreenState extends State<PriceScreen> {
                   );
                 }
 
+
                 return FloatingActionButton.extended(
                   backgroundColor: !snapshot.hasData || !snapshot.data
                       ? Colors.grey
@@ -122,7 +126,7 @@ class PriceScreenState extends State<PriceScreen> {
                   onPressed: !snapshot.hasData || !snapshot.data
                       ? null
                       : () {
-                          post();
+                          post(context);
                         },
                   label: Text('Post'),
                   icon: Icon(Icons.send),
@@ -131,23 +135,29 @@ class PriceScreenState extends State<PriceScreen> {
             );
           },
         ),
-      ),
-    );
+      );
   }
 
-  void post() async {
+  void post(con) async {
     //:TODO close this somewhere, somehow??
-    bloc.uploadComplete.listen((val){
-      print("THE UPLOAD STATUS IS" + val.toString());
-      // Upload status true
-      if (val){
 
+    subscription = bloc.uploadComplete.listen((data){});
+
+    bloc.uploadItem();
+
+    subscription.onData((dat){
+      if (dat) {
+        bloc.resetAll();
+        Navigator.popUntil(
+            context, ModalRoute.withName(Navigator.defaultRouteName));
       }
-
     });
 
 
-    bloc.uploadItem();
+
+    // TODO: possible problem using first here ????
+
+
   }
 
   @override
@@ -155,8 +165,13 @@ class PriceScreenState extends State<PriceScreen> {
 //    bloc.dispose();
     super.dispose();
 
+    if(subscription!=null) subscription.cancel();
+
     //:TODO make sure this works
-    bloc.dispose();
+    print("yoyoyoy");
+
+//    bloc.reset();
+//    bloc.dispose();
   }
 
   Widget dW(ItemBloc bloc) {

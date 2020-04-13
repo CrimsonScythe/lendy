@@ -31,6 +31,11 @@ class HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _tabController = new TabController(length: 2, vsync: this);
+    _tabController.addListener((){
+      if (_tabController.index==1){
+        _listingsBloc.changefabStream(false);
+      }
+    });
 
     _homeBloc = new HomeBloc();
 //    _tabController = new TabController(length: 2, vsync: );
@@ -72,7 +77,7 @@ class HomeScreenState extends State<HomeScreen>
                     children: [sLend(context, _listingsBloc), sBorrow(context, _listingsBloc)],
                     controller: _tabController,
                   )
-                : _navChooser(snapshot.data),
+                : _navChooser(snapshot.data, _listingsBloc),
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
@@ -131,7 +136,9 @@ Widget listings() {
 
 }
 
-_navChooser(data) {
+_navChooser(data,ListingsBloc listingsbloc) {
+  // remove FAB on bottom
+  listingsbloc.changefabStream(false);
   switch (data) {
     case NavBarItem.EXPLORE:
       return Text('EXPLORE');
@@ -145,4 +152,5 @@ _navChooser(data) {
     default:
       return Center(child: Text('ERROR'));
   }
+
 }

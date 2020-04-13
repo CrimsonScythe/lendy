@@ -61,9 +61,12 @@ class Repository {
   Future<File> takeImage() async =>
       await _imagePickerProvider.takeImage();
 
-
-
-  Stream<QuerySnapshot> myList() =>
+  Future<QuerySnapshot> myList() =>
       _firestoreProvider.myList(user_ID);
+
+//  Stream<QuerySnapshot> myList() =>
+//      _firestoreProvider.myList(user_ID);
+
+
 
 }

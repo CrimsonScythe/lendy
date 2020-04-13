@@ -12,8 +12,8 @@ class ItemBloc extends Object with Validators {
 
 
   final _repository = Repository();
-  final _title = BehaviorSubject<String>.seeded('');
-  final _des = BehaviorSubject<String>.seeded('');
+  final _title = BehaviorSubject<String>();
+  final _des = BehaviorSubject<String>();
   final _pic = BehaviorSubject<File>();
   final _drop = BehaviorSubject<String>();
   final _piclist = BehaviorSubject<List<File>>();
@@ -112,6 +112,7 @@ class ItemBloc extends Object with Validators {
 
   Stream<bool> get uploadComplete => Rx.combineLatest2(firestore, cloudstore, (f, c) {
     if (f==true && c==true){
+      _showProgress.sink.add(false);
       return true;
     } else {
       return false;
@@ -119,13 +120,27 @@ class ItemBloc extends Object with Validators {
 
   });
 
+//  Future<bool> getYolo() {
+//    uploadComplete.
+//    uploadComplete.listen((dat){
+//
+//    });
+//  }
+
+
+//  bool getStatus() async {
+//    uploadComplete.listen((val){
+//      return val;
+//    });
+//  }
+
   void uploadItem() {
 //    print(_repository.user_ID);
 
   // TODO: upload all images. get downloadurls create one doc with urls
   
     _showProgress.sink.add(true);
-    
+
 //    var future1 = _repository
 //        .uploadItem(_repository.user_ID, _drop.value, _title.value, _des.value, _daily.value,
 //    _weekly.value, _monthly.value, _deposit.value)
@@ -162,8 +177,8 @@ class ItemBloc extends Object with Validators {
             .then((value) {
 //          //:TODO check for errors here?
           _firestore.sink.add(true);
-          if (true)
-            _showProgress.sink.add(false);
+//          if (true)
+//            _showProgress.sink.add(false);
         })
             .catchError((err){
           print("error");
@@ -222,33 +237,100 @@ class ItemBloc extends Object with Validators {
     _piclist.sink.add(photosList);
   }
 
-  reset() {
-    _daily.drain();
-    _weekly.drain();
-    _monthly.drain();
-    _deposit.drain();
-    _showProgress.drain();
+  resetAll() {
+    _title.value='';
+    _des.value='';
+    photosList.clear();
+    _drop.value='Choose Category';
+    _daily.value='';
+    _weekly.value='';
+    _monthly.value='';
+    _deposit.value='';
+    _firestore.value=false;
+    _cloudstore.value=false;
   }
+
+  reset() {
+    _title.value='';
+    _des.value='';
+    photosList.clear();
+//    _piclist.value=null;
+    _drop.value='Choose Category';
+
+//    photosList.clear();
+//    _drop.value=null;
+//    _drop.drain();
+//    _piclist.value=null;
+//    _piclist.drain();
+//    _pic.value=null;
+//    _pic.drain();
+//    _des.value=null;
+//    _des.drain();
+//    _daily.value=null;
+//    _daily.drain();
+//    _weekly.value=null;
+//    _weekly.drain();
+//    _monthly.value=null;
+//    _monthly.drain();
+//    _deposit.value=null;
+//    _deposit.drain();
+//    _showProgress.drain();
+//    _firestore.value=null;
+//    _firestore.drain();
+//    _cloudstore.value=null;
+//    _cloudstore.drain();
+  }
+
 
   dispose() async {
     // TODO: call close somewhere !
     print('CALLED 222');
-    photosList.clear();
-    _title.drain();
-//    _title.close();
-    _des.drain();
-//    _des.close();
-    _pic.drain();
-//    _pic.close();
-    _piclist.drain();
-//    _piclist.close();
-    _drop.value=null;
-    _drop.drain();
-//    _drop.close();
-    _daily.drain();
-    _weekly.drain();
-    _monthly.drain();
-    _deposit.drain();
-    _showProgress.drain();
+//    photosList.clear();
+//    _title.drain();
+//    _des.drain();
+//    _pic.drain();
+//    _piclist.drain();
+//    _drop.value=null;
+//    _drop.drain();
+//    _daily.drain();
+//    _weekly.drain();
+//    _monthly.drain();
+//    _deposit.drain();
+//    _showProgress.drain();
+//    _firestore.value=null;
+//    _firestore.drain();
+//    _cloudstore.value=null;
+//    _cloudstore.drain();
+
+//    photosList.clear();
+////    _title.value=null;
+//    _title.drain();
+////    _drop.value=null;
+//    _drop.drain();
+////    _piclist.value=null;
+//    _piclist.drain();
+////    _pic.value=null;
+//    _pic.drain();
+////    _des.value=null;
+//    _des.drain();
+////    _daily.value=null;
+//    _daily.drain();
+////    _weekly.value=null;
+//    _weekly.drain();
+////    _monthly.value=null;
+//    _monthly.drain();
+////    _deposit.value=null;
+//    _deposit.drain();
+//    _showProgress.drain();
+////    _firestore.value=null;
+//    _firestore.drain();
+////    _cloudstore.value=null;
+//    _cloudstore.drain();
+
+
+  _title.value='';
+
+//  _title.sink.add('Title cannot be empty');
+
   }
 }

@@ -76,7 +76,7 @@ class LendScreenState extends State<LendScreen> {
     // :TODO should dispose here or later?
 //    bloc.dispose();
     print("CALLED 111");
-    bloc.dispose();
+    bloc.reset();
     super.dispose();
   }
 

@@ -81,13 +81,14 @@ class FirestoreProvider {
   }
 
 
-//
+
+  Future<QuerySnapshot> myList(uID) {
+     return _firestore.collection('users').document(uID).collection('lend').orderBy('time', descending: true).getDocuments();
+  }
+
 //  Stream<QuerySnapshot> myList(uID) {
-//     return _firestore.collection('users').document(uID).collection('lend').getDocuments().asStream();
+//    return _firestore.collection('users').document(uID).collection('lend').getDocuments().asStream();
 //  }
 
-  Stream<QuerySnapshot> myList(uID) {
-    return _firestore.collection('users').document(uID).collection('lend').getDocuments().asStream();
-  }
 
 }

@@ -6,12 +6,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:lendy/src/blocs/ListingsBloc.dart';
 import 'package:lendy/src/models/item.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 Widget sLend(context, ListingsBloc bloc) {
   return Container(
     child: StreamBuilder(
-        stream: bloc.myList(),
+        stream: bloc.myListStream,
         builder: (scontext, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting){
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Center(
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              ],
+            );
+          }
           if (snapshot.hasData) {
             List<DocumentSnapshot> docs = snapshot.data.documents;
             List<Item> itemList = bloc.mapToList(docs);
@@ -28,10 +44,11 @@ Widget sLend(context, ListingsBloc bloc) {
 }
 
 List imageList(urls) {
-  var list = <NetworkImage>[];
+  var list = <FadeInImage>[];
   print(urls[0]);
+
   for (int i=0; i < urls.length;  i++) {
-    list.add(NetworkImage(urls[i]));
+    list.add(FadeInImage.memoryNetwork(image: urls[i], placeholder: kTransparentImage,));
   }
   return list;
 }
@@ -46,6 +63,7 @@ Widget buildList(List<Item> list) {
             padding: EdgeInsets.all(8.0),
             child: Card(
               elevation: 3.0,
+
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -53,17 +71,19 @@ Widget buildList(List<Item> list) {
                   SizedBox(
                     height: 250,
                     child: Carousel(
-                      autoplay: false,
-                      radius: Radius.circular(15.0),
                       borderRadius: true,
+                      radius: Radius.circular(0.0),
+                      autoplay: false,
                       images: imageList(list[index].urls),
                       dotSize: 6.0,
-                      indicatorBgPadding: 10.0,
+                      dotBgColor: Colors.grey.withOpacity(0.6),
+                      indicatorBgPadding: 8.0,
+                      overlayShadowSize: 0.0,
                       overlayShadow: true,
                     ),
                   ),
                   Padding(padding: EdgeInsets.all(8.0), child: Text(list[index].title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),),),
-                  Padding(padding: EdgeInsets.all(8.0), child: Text(list[index].daily.toString()+" DKK", style: TextStyle(fontSize: 15.0),),)
+                  Padding(padding: EdgeInsets.all(8.0), child: Text(list[index].daily.toString()+" DKK daily", style: TextStyle(fontSize: 15.0, fontStyle: FontStyle.italic),),)
                 ],
               ),
             ),

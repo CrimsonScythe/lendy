@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lendy/resources/repository.dart';
 import 'package:lendy/src/blocs/validators.dart';
 import 'package:lendy/src/models/item.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ListingsBloc extends Object with Validators {
 
@@ -12,10 +13,27 @@ class ListingsBloc extends Object with Validators {
 
   Stream<bool> get fabStream => _fabStream.stream;
 
-  Stream<QuerySnapshot> myList() {
-    return _repository.myList();
-  }
+  Function(bool) get changefabStream => _fabStream.sink.add;
 
+  Stream<QuerySnapshot> get myListStream => myList();
+
+  final _myList = BehaviorSubject<QuerySnapshot>();
+
+//  Stream<QuerySnapshot> myList() {
+//    return _repository.myList();
+//  }
+
+  Stream<QuerySnapshot> myList() {
+
+    _repository.myList().then((value){
+      if (value != null){
+        _myList.sink.add(value);
+      }
+    });
+
+    return _myList.stream;
+
+  }
 
 
   List mapToList(List<DocumentSnapshot> docList) {
@@ -26,10 +44,10 @@ class ListingsBloc extends Object with Validators {
         myList.add(new Item(document.data['cat'],
             document.data['title'],
             document.data['des'],
-            int.parse(document.data['daily']),
-            int.parse(document.data['monthly']),
-            int.parse(document.data['weekly']),
-            int.parse(document.data['depo']),
+            int.parse(document.data['daily'].toString().replaceAll(("."), "")),
+            int.parse(document.data['monthly'].toString().replaceAll(("."), "")),
+            int.parse(document.data['weekly'].toString().replaceAll(".", "")),
+            int.parse(document.data['depo'].toString().replaceAll(".", "")),
           document.data['urls']
         ));
       });
