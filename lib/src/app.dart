@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lendy/resources/bloc_provider.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
 import 'package:lendy/src/blocs/provider.dart';
+import 'package:lendy/src/screens/edit_screen.dart';
 import 'package:lendy/src/screens/forgotpass_screen.dart';
 import 'package:lendy/src/screens/lend.dart';
 import 'package:lendy/src/screens/login_screen.dart';
@@ -32,7 +33,8 @@ class App extends StatelessWidget {
           '/signin': (BuildContext context) => new SigninScreen(),
           '/forgotpass' : (BuildContext context) => new ForgotPassScreen(),
           '/lend' : (BuildContext context) => new LendScreen(),
-          '/price' : (BuildContext context) => new PriceScreen()
+          '/price' : (BuildContext context) => new PriceScreen(),
+          '/edit' : (BuildContext context) => new EditScreen()
         },
       ),
     );

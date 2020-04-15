@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:lendy/src/blocs/ListingsBloc.dart';
 import 'package:lendy/src/models/item.dart';
+import 'package:lendy/src/screens/edit_screen.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 Widget sLend(context, ListingsBloc bloc) {
@@ -61,32 +62,38 @@ Widget buildList(List<Item> list) {
         return
           Padding(
             padding: EdgeInsets.all(8.0),
-            child: Card(
-              elevation: 3.0,
-
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  SizedBox(
-                    height: 250,
-                    child: Carousel(
-                      borderRadius: true,
-                      radius: Radius.circular(0.0),
-                      autoplay: false,
-                      images: imageList(list[index].urls),
-                      dotSize: 6.0,
-                      dotBgColor: Colors.grey.withOpacity(0.6),
-                      indicatorBgPadding: 8.0,
-                      overlayShadowSize: 0.0,
-                      overlayShadow: true,
+            child: GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (context) => EditScreen(urls: list[index].urls, item: list[index], index: index,),
+              )),
+              child: Card(
+                elevation: 3.0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 250,
+                      child: Hero(
+                        tag: 'hero'+index.toString(),
+                        child: Carousel(
+                        borderRadius: true,
+                        radius: Radius.circular(0.0),
+                        autoplay: false,
+                        images: imageList(list[index].urls),
+                        dotSize: 6.0,
+                        dotBgColor: Colors.grey.withOpacity(0.6),
+                        indicatorBgPadding: 8.0,
+                        overlayShadowSize: 0.0,
+                        overlayShadow: true,
+                      ),),
                     ),
-                  ),
-                  Padding(padding: EdgeInsets.all(8.0), child: Text(list[index].title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),),),
-                  Padding(padding: EdgeInsets.all(8.0), child: Text(list[index].daily.toString()+" DKK daily", style: TextStyle(fontSize: 15.0, fontStyle: FontStyle.italic),),)
-                ],
+                    Padding(padding: EdgeInsets.all(8.0), child: Text(list[index].title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),),),
+                    Padding(padding: EdgeInsets.all(8.0), child: Text(list[index].daily.toString()+" DKK daily", style: TextStyle(fontSize: 15.0, fontStyle: FontStyle.italic),),)
+                  ],
+                ),
               ),
-            ),
+            )
           );
       },
       separatorBuilder: (con, index) => Container(),
