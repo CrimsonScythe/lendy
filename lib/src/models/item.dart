@@ -8,10 +8,31 @@ class Item {
   final int _weekly;
   final int depo;
   final List _urls;
+  final String _docID;
+  final List _imgNames;
+  final String _userName;
+  final String _userProfileUrl;
+  final String _uID;
 
   Item(this._category,
       this._title,
-      this._des, this._daily, this._monthly, this._weekly, this.depo, this._urls);
+      this._des,
+      this._daily,
+      this._monthly,
+      this._weekly,
+      this.depo,
+      this._urls,
+      this._docID,
+      this._imgNames,
+      this._userName,
+      this._userProfileUrl,
+      this._uID
+      );
+
+  String get docID => _docID;
+
+  String get userName => _userName;
+  String get userProfileUrl => _userProfileUrl;
 
   String get title => _title;
   int get daily => _daily;
@@ -24,6 +45,8 @@ class Item {
 
 
   String get des => _des;
+
+  List get imgNames => _imgNames;
 
 
   String get category => _category;

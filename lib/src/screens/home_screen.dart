@@ -1,8 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lendy/resources/firestore_provider.dart';
+import 'package:lendy/resources/repository.dart';
+import 'package:lendy/src/blocs/ExploreBloc.dart';
 import 'package:lendy/src/blocs/HomeBloc.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
 import 'package:lendy/src/blocs/ListingsBloc.dart';
+import 'package:lendy/src/screens/explore_screen.dart';
 import '../blocs/PostsBloc.dart';
 import 'borrowing_screen.dart';
 import 'lending_screen.dart';
@@ -24,6 +29,7 @@ class HomeScreenState extends State<HomeScreen>
   ListingsBloc _listingsBloc = new ListingsBloc();
 
   ItemBloc bloc = new ItemBloc();
+  ExploreBloc _exploreBloc = new ExploreBloc();
 
 //  TabController _tabController;
 
@@ -77,7 +83,7 @@ class HomeScreenState extends State<HomeScreen>
                     children: [sLend(context, _listingsBloc), sBorrow(context, _listingsBloc)],
                     controller: _tabController,
                   )
-                : _navChooser(snapshot.data, _listingsBloc),
+                : _navChooser(context, snapshot.data, _listingsBloc, _exploreBloc),
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
@@ -136,21 +142,34 @@ Widget listings() {
 
 }
 
-_navChooser(data,ListingsBloc listingsbloc) {
+_navChooser(context, data,ListingsBloc listingsbloc, explorebloc) {
   // remove FAB on bottom
   listingsbloc.changefabStream(false);
   switch (data) {
     case NavBarItem.EXPLORE:
-      return Text('EXPLORE');
+      return sExplore(context, explorebloc);
 //    case NavBarItem.LISTINGS:
 //      return listings();
     case NavBarItem.CHAT:
       return Text('CHAT');
     case NavBarItem.PROFILE:
-      return Text('PROFILE');
+      return wProfile();
 //                hopefully we never get down to default
     default:
       return Center(child: Text('ERROR'));
   }
 
 }
+
+Widget wProfile() {
+  return Container(
+   child: RaisedButton(
+       onPressed: () async {
+         final FirebaseAuth _auth = FirebaseAuth.instance;
+         await _auth.signOut();
+       }
+   ),
+  );
+}
+
+

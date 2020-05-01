@@ -17,16 +17,25 @@ void main() async {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Repository _repo = Repository();
 
-  
+
 
   Widget _defaultHome = LoginScreen();
 
   FirebaseUser _result2 = await _auth.currentUser();
 
+  // TODO: we get the location here good?
+  _repo.getLocation();
 
   if (_result2 != null){
     // TODO: Could this be null? Do I need to null check this before assigning?
     _repo.user_ID = _result2.uid;
+    _result2.providerData.forEach((profile){
+      print("Name: " + profile.displayName);
+      print("Photo: " + profile.photoUrl);
+      _repo.userName = profile.displayName;
+      _repo.userProfileUrl = profile.photoUrl;
+    });
+
     _defaultHome = new HomeScreen();
   }
 

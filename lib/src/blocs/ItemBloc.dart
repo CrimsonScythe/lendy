@@ -2,10 +2,15 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:lendy/resources/bloc_provider.dart';
+import 'package:lendy/resources/location_provider.dart';
 import 'package:lendy/resources/repository.dart';
 import 'package:lendy/src/blocs/validators.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:http/http.dart' as http;
+
 
 class ItemBloc extends Object with Validators {
   final List<File> photosList = <File>[];
@@ -16,6 +21,11 @@ class ItemBloc extends Object with Validators {
   final _des = BehaviorSubject<String>();
   final _pic = BehaviorSubject<File>();
   final _drop = BehaviorSubject<String>();
+
+  set title(value) {
+    _title.sink.add(value);
+  }
+
   final _piclist = BehaviorSubject<List<File>>();
 
   final _daily = BehaviorSubject<String>();
@@ -47,6 +57,7 @@ class ItemBloc extends Object with Validators {
   .doOnData((String c){
 
   });
+
 
   Stream<String> get deposit => _deposit.stream.transform(validateDeposit);
 
@@ -134,30 +145,94 @@ class ItemBloc extends Object with Validators {
 //    });
 //  }
 
-  void uploadItem() {
-//    print(_repository.user_ID);
+  void fetchItems(item) async {
 
-  // TODO: upload all images. get downloadurls create one doc with urls
-  
     _showProgress.sink.add(true);
 
-//    var future1 = _repository
-//        .uploadItem(_repository.user_ID, _drop.value, _title.value, _des.value, _daily.value,
-//    _weekly.value, _monthly.value, _deposit.value)
-//    // TODO: MOST IMPORTANT By design, connection state should be check on the homescreen because firebase
-//    // TODO: does not return an error
-//        .then((value) {
-////          //:TODO check for errors here?
-//          _firestore.sink.add(true);
-//          if (true)
-//            _showProgress.sink.add(false);
-//    })
-//    .catchError((err){
-//      print("error");
-//    });
+
+    var fut = <Future>[];
+
+    var list = List<File>();
+
+    for (int i=0; i < item.urls.length; i++){
+      var direc = await getApplicationDocumentsDirectory();
+      var res = await http.get(item.urls[i]);
+      var path = direc.path;
+      var time = DateTime.now();
+      var file = File('$path/$time'+i.toString()+'.png');
+      var fileReal = await file.writeAsBytes(res.bodyBytes);
+
+      list.add(fileReal);
+    }
+
+    setImage(list);
+    _showProgress.sink.add(false);
+
+
+  }
+
+  void deleteItem(dID, imgNames) {
+    _showProgress.sink.add(true);
+
+    var futureList = _repository.deleteImage(imgNames);
+    Future.wait(futureList)
+    .whenComplete((){
+      _cloudstore.sink.add(true);
+
+      _repository.deleteItem(_repository.user_ID, dID, imgNames).whenComplete((){
+        _firestore.sink.add(true);
+      });
+
+    });
+
+  }
+
+  void updateItem(docID, imgNames) {
+
+
+    _showProgress.sink.add(true);
+
+    var futureList = _repository.updateImage(_repository.user_ID, imgNames, photosList);
+    Future.wait(futureList)
+    .then((storageTaskSnapshot){
+      _cloudstore.sink.add(true);
+
+      var futureList2 = _repository.getDownloadURLs(storageTaskSnapshot);
+      Future.wait(futureList2)
+      .then((urlList){
+
+        var future1 = _repository.updateItem(_repository.user_ID, docID, _drop.value, _title.value, _des.value,
+            _daily.value, _weekly.value, _monthly.value, _deposit.value,
+            urlList)
+        // TODO: MOST IMPORTANT By design, connection state should be check on the homescreen because firebase
+        // TODO: does not return an error
+            .then((value) {
+//          //:TODO check for errors here?
+          _firestore.sink.add(true);
+
+        })
+            .catchError((err){
+          print("error");
+        });
+      });
+    });
+
+
+  }
+
+  void uploadItem() {
+  // TODO: upload all images. get downloadurls create one doc with urls
+    _showProgress.sink.add(true);
 
     // storage task first
-    var futureList = _repository.uploadImage(_repository.user_ID, photosList);
+    List imgNames = new List<String>();
+    var time = DateTime.now().millisecondsSinceEpoch.toString();
+
+    for (int i = 0; i < photosList.length; i++){
+      imgNames.add(time+i.toString());
+    }
+
+    var futureList = _repository.uploadImage(_repository.user_ID, photosList, imgNames);
     var downloadURLs = [];
     Future.wait(futureList)
     .then((storageTaskSnapList){
@@ -167,30 +242,33 @@ class ItemBloc extends Object with Validators {
 
       var futureList2 = _repository.getDownloadURLs(storageTaskSnapList);
       Future.wait(futureList2)
-      .then((urlList){
+      .then((urlList) async {
+
+        print("repo is"+_repository.user_Location.toString());
+
+        if (_repository.user_Location==null){
+          LocationProvider locationProvider = new LocationProvider();
+          _repository.user_Location = await locationProvider.getLocation();
+        }
+
 
         var future1 = _repository
             .uploadItem(_repository.user_ID, _drop.value, _title.value, _des.value, _daily.value,
-            _weekly.value, _monthly.value, _deposit.value, urlList)
+            _weekly.value, _monthly.value, _deposit.value, urlList, imgNames, _repository.user_Location, _repository.userName, _repository.userProfileUrl)
         // TODO: MOST IMPORTANT By design, connection state should be check on the homescreen because firebase
         // TODO: does not return an error
             .then((value) {
 //          //:TODO check for errors here?
           _firestore.sink.add(true);
-//          if (true)
-//            _showProgress.sink.add(false);
+
         })
             .catchError((err){
           print("error");
         });
 
-//        print(urlList.runtimeType);
-//        print(urlList);
-
       });
 
     });
-
 
   }
 
@@ -228,6 +306,16 @@ class ItemBloc extends Object with Validators {
     });
   }
 
+  void setImage(List<File> pics) {
+
+    pics.forEach((f){
+      photosList.add(f);
+    });
+    _piclist.sink.add(photosList);
+
+  }
+
+
   void deleteImage(index) {
 //    print("length"+ photosList.length.toString());
     photosList.removeAt(index);
@@ -248,6 +336,7 @@ class ItemBloc extends Object with Validators {
     _deposit.value='';
     _firestore.value=false;
     _cloudstore.value=false;
+    // added new below
   }
 
   reset() {
@@ -332,5 +421,29 @@ class ItemBloc extends Object with Validators {
 
 //  _title.sink.add('Title cannot be empty');
 
+  }
+
+  set des(value) {
+    _des.sink.add(value);
+  }
+
+  set drop(value) {
+    _drop.sink.add(value);
+  }
+
+  set daily(value) {
+    _daily.sink.add(value);
+  }
+
+  set weekly(value) {
+    _weekly.sink.add(value);
+  }
+
+  set monthly(value) {
+    _monthly.sink.add(value);
+  }
+
+  set deposit(value) {
+    _deposit.sink.add(value);
   }
 }

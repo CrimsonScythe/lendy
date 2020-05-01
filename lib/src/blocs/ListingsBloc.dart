@@ -48,7 +48,12 @@ class ListingsBloc extends Object with Validators {
             int.parse(document.data['monthly'].toString().replaceAll(("."), "")),
             int.parse(document.data['weekly'].toString().replaceAll(".", "")),
             int.parse(document.data['depo'].toString().replaceAll(".", "")),
-          document.data['urls']
+            document.data['urls'],
+            document.documentID,
+            document.data['imgNames'],
+            document.data['name'],
+            document.data['pUrl'],
+            document.data['uID']
         ));
       });
     }

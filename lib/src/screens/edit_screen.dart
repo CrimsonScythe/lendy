@@ -1,8 +1,16 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lendy/resources/bloc_provider.dart';
+import 'package:lendy/src/blocs/ItemBloc.dart';
 import 'package:lendy/src/models/item.dart';
+import 'package:lendy/src/screens/lend.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:http/http.dart' as http;
+
 
 class EditScreen extends StatefulWidget {
 
@@ -10,6 +18,8 @@ class EditScreen extends StatefulWidget {
   State<StatefulWidget> createState() {
     return EditScreenState();
   }
+
+
 
   final List urls;
   final Item item;
@@ -21,9 +31,14 @@ class EditScreen extends StatefulWidget {
 
 class EditScreenState extends State<EditScreen> {
 
+  ItemBloc bloc;
+
+
+  StreamSubscription<bool> subscription;
 
   @override
   Widget build(BuildContext context) {
+    bloc  = BlocProvider.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit item'),
@@ -53,25 +68,36 @@ class EditScreenState extends State<EditScreen> {
             cat(widget.item.category),
             pricing(widget.item.prices),
             SizedBox(height: 10,),
-            Row
-              (mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-              RaisedButton(child: Text('Edit'),
-                padding: EdgeInsets.all(12.0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-                onPressed: () {
-                edit();
-                },),
-              SizedBox(width: 10.0,),
-              RaisedButton(child: Text('Delete'),
-                  padding: EdgeInsets.all(12.0),
-                  color: Colors.red,
-                  textColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-                onPressed: () {
-                delete();
-                },)
-            ],)
+            StreamBuilder(
+              stream: bloc.showProgress,
+                builder: (context, snapshot){
+                  if (snapshot.hasData && snapshot.data) {
+                    return CircularProgressIndicator();
+                  } else {
+                    return Row
+                      (mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        RaisedButton(child: Text('Edit'),
+                          padding: EdgeInsets.all(12.0),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                          onPressed: () {
+
+                            edit(widget.item);
+                          },),
+                        SizedBox(width: 10.0,),
+                        RaisedButton(child: Text('Delete'),
+                          padding: EdgeInsets.all(12.0),
+                          color: Colors.red,
+                          textColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                          onPressed: () {
+                            delete(widget.item);
+                          },)
+                      ],
+                    );
+                  }
+                }
+                )
           ],
         ),
       ),
@@ -136,11 +162,65 @@ class EditScreenState extends State<EditScreen> {
     );
   }
 
-  void edit() {
+
+  void edit (Item item) async {
+
+    ItemBloc bloc = BlocProvider.of(context);
+
+//    var list = List<File>();
+//
+//    for (int i=0; i < item.urls.length; i++){
+//      var direc = await getApplicationDocumentsDirectory();
+//      var res = await http.get(item.urls[i]);
+//      var path = direc.path;
+//      var time = DateTime.now();
+//      var file = File('$path/$time'+i.toString()+'.png');
+//      var fileReal = await file.writeAsBytes(res.bodyBytes);
+//
+//      list.add(fileReal);
+//    }
+
+    bloc.fetchItems(item);
+//    bloc.setImage(list);
+
+    bloc.drop = item.category;
+    bloc.title = item.title;
+    bloc.des = item.des;
+
+    bloc.daily = item.daily.toString();
+    bloc.weekly = item.weekly.toString();
+    bloc.monthly = item.monthly.toString();
+
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) =>
+          LendScreen(titleText: 'Edit item',item: item,),
+    ));
 
   }
 
-  void delete() {
+  void delete(Item item) {
+    ItemBloc bloc = BlocProvider.of(context);
+
+    subscription = bloc.uploadComplete.listen((data){});
+
+    bloc.deleteItem(item.docID, item.imgNames);
+
+    subscription.onData((data){
+      if (data){
+        bloc.resetAll();
+        Navigator.popUntil(
+            context, ModalRoute.withName(Navigator.defaultRouteName));
+      }
+    });
+
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    if(subscription!=null) subscription.cancel();
+    bloc.reset();
 
   }
 

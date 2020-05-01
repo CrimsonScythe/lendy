@@ -2,33 +2,25 @@ import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geolocator/geolocator.dart';
 
 class FirestoreProvider {
 
   Firestore _firestore = Firestore.instance;
   FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
 
-//  Future<DocumentReference> uploadPic(uID, pID) {
-//
-//    var loc = "DK";
-//
-////    Map<String, Object> data = {
-////      'location': loc,
-////    };
-//
-//    Map<String, Object> dat = Map();
-//    dat['location'] = loc;
-//    dat['pid'] = pID;
-//
-//    return _firestore.collection("users").document(uID).collection("lend")
-//        .add(dat);
-//  }
 
-   List<Future> uploadImage(uID, photos) {
+  signOut() {
+
+  }
+
+   List<Future> uploadImage(uID, photos, imgNames) {
 //    var list = List<Future<StorageTaskSnapshot>>();
     var fut = <Future>[];
     for (var i = 0; i < photos.length; i++){
-      fut.add(_firebaseStorage.ref().child('images/' + i.toString() + uID + new DateTime.now().millisecondsSinceEpoch.toString()).putFile(photos[i]).onComplete);
+
+      fut.add(_firebaseStorage.ref().child
+        ('images/' + imgNames[i]).putFile(photos[i]).onComplete);
 
 //      _firebaseStorage.ref().child('images/' + i.toString() + uID + new DateTime.now().millisecondsSinceEpoch.toString()).putFile(photos[0]).onComplete;
     }
@@ -36,23 +28,77 @@ class FirestoreProvider {
     return fut;
   }
 
+
+  List<Future> deleteImage(imgNames) {
+
+    var fut = <Future>[];
+    for (var i = 0; i < imgNames.length; i++){
+      fut.add(_firebaseStorage.ref().child
+        ('images/' + imgNames[i]).delete());
+
+    }
+    return fut;
+  }
+
+  Future deleteItem(uID, dID, imgNames) {
+
+     return _firestore.collection("users")
+         .document(uID).collection("lend")
+         .document(dID).delete();
+
+  }
+
+  List<Future> updateImage(uID, imgNames, photos)  {
+
+    var fut = <Future>[];
+    for (var i = 0; i < photos.length; i++){
+
+      fut.add(_firebaseStorage.ref().child
+        ('images/' + imgNames[i]).putFile(photos[i]).onComplete);
+
+    }
+
+    return fut;
+
+
+  }
+
   List<Future> downloadURLs(list) {
      var fut = <Future>[];
 
      list.forEach((f){
+
+       print(f.ref.getDownloadURL().toString());
+
        fut.add(f.ref.getDownloadURL());
      });
      return fut;
   }
 
-  Future<DocumentReference> uploadItem(uID,
+  Future<void> updateItem(uID, dID, 
       cat, title, des, daily, weekly, monthly, depo, urls) {
 
-    var loc = "DK";
+    Map<String, Object> data = Map();
+    data['cat'] = cat;
+    data['title'] = title;
+    data['des'] = des;
+    data['daily'] = daily;
+    data['weekly'] = weekly;
+    data['monthly'] = monthly;
+    data['depo'] = depo;
+    data['loc'] = 'DK';
+    data['urls'] = urls;
+    data['time'] = DateTime.now();
+     
+     return _firestore.collection("users")
+         .document(uID).collection("lend")
+         .document(dID).updateData(data);
+  }
+  
+  Future<DocumentReference> uploadItem(uID,
+      cat, title, des, daily, weekly, monthly, depo, urls, imgNames, Position loc,
+      String userName, String profileUrl) {
 
-//    Map<String, Object> data = {
-//      'location': loc,
-//    };
 
     Map<String, Object> dat = Map();
     dat['cat'] = cat;
@@ -62,12 +108,19 @@ class FirestoreProvider {
     dat['weekly'] = weekly;
     dat['monthly'] = monthly;
     dat['depo'] = depo;
-    dat['loc'] = loc;
+    dat['loc'] = [loc.latitude, loc.longitude];
     dat['urls'] = urls;
+    dat['imgNames'] = imgNames;
     dat['time'] = DateTime.now();
+    dat['name'] = userName;
+    dat['pUrl'] = profileUrl;
+    dat['uID'] = uID;
+
 
     return _firestore.collection("users").document(uID).collection("lend")
         .add(dat);
+
+
   }
   
   Future<void> addUser(uID) {
@@ -84,6 +137,14 @@ class FirestoreProvider {
 
   Future<QuerySnapshot> myList(uID) {
      return _firestore.collection('users').document(uID).collection('lend').orderBy('time', descending: true).getDocuments();
+  }
+
+  Future<QuerySnapshot> getItems(uID) {
+    return _firestore.collectionGroup('lend').getDocuments();
+
+  //:TODO need to filter UID locally as firebase does not dupport !=
+//    return _firestore.collectionGroup('lend').orderBy('time', descending: true).getDocuments();
+
   }
 
 //  Stream<QuerySnapshot> myList(uID) {

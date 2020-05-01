@@ -5,14 +5,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:lendy/resources/bloc_provider.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
+import 'package:lendy/src/models/item.dart';
 
 class PriceScreen extends StatefulWidget {
 
+  final String titleText;
+  final Item item;
 
   @override
   State<StatefulWidget> createState() {
     return PriceScreenState();
   }
+
+  PriceScreen({Key key, this.titleText, this.item, });
 }
 
 class PriceScreenState extends State<PriceScreen> {
@@ -107,7 +112,7 @@ class PriceScreenState extends State<PriceScreen> {
                   return FloatingActionButton.extended(
                     backgroundColor: Colors.grey,
                     onPressed: null,
-                    label: Text('Posting...'),
+                    label: widget.titleText==null?Text('Posting...'):Text('Updating...'),
                     icon: SizedBox(
                       height: 20,
                       width: 20,
@@ -126,9 +131,10 @@ class PriceScreenState extends State<PriceScreen> {
                   onPressed: !snapshot.hasData || !snapshot.data
                       ? null
                       : () {
-                          post(context);
+                          widget.titleText==null?
+                          post(context):update(context);
                         },
-                  label: Text('Post'),
+                  label: widget.titleText==null?Text('Post'):Text('Update'),
                   icon: Icon(Icons.send),
                 );
               },
@@ -136,6 +142,21 @@ class PriceScreenState extends State<PriceScreen> {
           },
         ),
       );
+  }
+
+  void update(con) async {
+    subscription = bloc.uploadComplete.listen((data){});
+
+    bloc.updateItem(widget.item.docID, widget.item.imgNames);
+
+    subscription.onData((dat){
+      if (dat) {
+        bloc.resetAll();
+        Navigator.popUntil(
+            context, ModalRoute.withName(Navigator.defaultRouteName));
+      }
+    });
+
   }
 
   void post(con) async {
@@ -153,10 +174,7 @@ class PriceScreenState extends State<PriceScreen> {
       }
     });
 
-
-
     // TODO: possible problem using first here ????
-
 
   }
 

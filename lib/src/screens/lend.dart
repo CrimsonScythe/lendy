@@ -1,37 +1,65 @@
+import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lendy/resources/bloc_provider.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
+import 'package:lendy/src/models/item.dart';
+import 'package:http/http.dart' as http;
+import 'package:lendy/src/screens/price_screen.dart';
+
 
 class LendScreen extends StatefulWidget {
 
+
+//  final bool isEdit;
+  final Item item;
+  final String titleText;
 
   @override
   State<StatefulWidget> createState() {
     return LendScreenState();
   }
+
+  LendScreen({Key key, this.titleText, this.item });
+
 }
 
+
 class LendScreenState extends State<LendScreen> {
+
   var itemCount = 1;
   ItemBloc bloc;
+
+
+  var titleCon = new TextEditingController();
+  var desCon = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
 
+    titleCon.addListener((){
+      bloc.changeTitle(titleCon.text);
+    });
+
+    desCon.addListener((){
+      bloc.changeDes(desCon.text);
+    });
+
   }
+
+
 
   @override
   Widget build(BuildContext context) {
 
+    //:TODO should moce this to initstate?
     bloc  = BlocProvider.of(context);
-//    bloc = BlocProvider.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add item"),
+        title: widget.titleText==null? Text("Add item") : Text(widget.titleText),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -96,7 +124,6 @@ class LendScreenState extends State<LendScreen> {
                 return ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (con, index) {
-                      print(index);
                       if (!snapshot1.hasData || index == snapshot1.data.length) {
                         return dottedBorder();
                       }
@@ -190,8 +217,17 @@ class LendScreenState extends State<LendScreen> {
     return StreamBuilder(
       stream: bloc.title,
       builder: (context, snapshot) {
+
+        if (snapshot.hasData){
+          titleCon.value = TextEditingValue(
+              text: snapshot.data,
+              selection: TextSelection.fromPosition(TextPosition(offset: snapshot.data.toString().length))
+          );
+        }
+
         return TextField(
-          onChanged: bloc.changeTitle,
+          controller: titleCon,
+//          onChanged: bloc.changeTitle,
           decoration: InputDecoration(
               hintText: 'Enter title',
               labelText: 'Title',
@@ -205,8 +241,17 @@ class LendScreenState extends State<LendScreen> {
     return StreamBuilder(
       stream: bloc.des,
       builder: (context, snapshot) {
+
+        if (snapshot.hasData){
+          desCon.value = TextEditingValue(
+              text: snapshot.data,
+              selection: TextSelection.fromPosition(TextPosition(offset: snapshot.data.toString().length))
+          );
+        }
+
         return TextField(
-          onChanged: bloc.changeDes,
+          controller: desCon,
+//          onChanged: bloc.changeDes,
           keyboardType: TextInputType.multiline,
           maxLines: null,
           decoration: InputDecoration(
@@ -310,6 +355,10 @@ class LendScreenState extends State<LendScreen> {
   }
 
   void navNext() {
-    Navigator.of(context).pushNamed('/price');
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) =>
+          PriceScreen(titleText: widget.titleText,item: widget.item,)
+    ));
+//    Navigator.of(context).pushNamed('/price');
   }
 }

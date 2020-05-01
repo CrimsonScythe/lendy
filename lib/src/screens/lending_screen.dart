@@ -46,7 +46,8 @@ Widget sLend(context, ListingsBloc bloc) {
 
 List imageList(urls) {
   var list = <FadeInImage>[];
-  print(urls[0]);
+  if (urls.length!=0)
+    print(urls[0]);
 
   for (int i=0; i < urls.length;  i++) {
     list.add(FadeInImage.memoryNetwork(image: urls[i], placeholder: kTransparentImage,));
