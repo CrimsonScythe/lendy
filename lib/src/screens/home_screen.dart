@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lendy/resources/firestore_provider.dart';
 import 'package:lendy/resources/repository.dart';
+import 'package:lendy/src/blocs/ChatBloc.dart';
 import 'package:lendy/src/blocs/ExploreBloc.dart';
 import 'package:lendy/src/blocs/HomeBloc.dart';
 import 'package:lendy/src/blocs/ItemBloc.dart';
@@ -10,6 +11,7 @@ import 'package:lendy/src/blocs/ListingsBloc.dart';
 import 'package:lendy/src/screens/explore_screen.dart';
 import '../blocs/PostsBloc.dart';
 import 'borrowing_screen.dart';
+import 'chat_screen.dart';
 import 'lending_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,6 +32,7 @@ class HomeScreenState extends State<HomeScreen>
 
   ItemBloc bloc = new ItemBloc();
   ExploreBloc _exploreBloc = new ExploreBloc();
+  ChatBloc _chatBloc = new ChatBloc();
 
 //  TabController _tabController;
 
@@ -83,7 +86,7 @@ class HomeScreenState extends State<HomeScreen>
                     children: [sLend(context, _listingsBloc), sBorrow(context, _listingsBloc)],
                     controller: _tabController,
                   )
-                : _navChooser(context, snapshot.data, _listingsBloc, _exploreBloc),
+                : _navChooser(context, snapshot.data, _listingsBloc, _exploreBloc, _chatBloc),
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
@@ -142,7 +145,7 @@ Widget listings() {
 
 }
 
-_navChooser(context, data,ListingsBloc listingsbloc, explorebloc) {
+_navChooser(context, data,ListingsBloc listingsbloc, explorebloc, chatbloc) {
   // remove FAB on bottom
   listingsbloc.changefabStream(false);
   switch (data) {
@@ -151,7 +154,7 @@ _navChooser(context, data,ListingsBloc listingsbloc, explorebloc) {
 //    case NavBarItem.LISTINGS:
 //      return listings();
     case NavBarItem.CHAT:
-      return Text('CHAT');
+      return sChat(context, chatbloc);
     case NavBarItem.PROFILE:
       return wProfile();
 //                hopefully we never get down to default

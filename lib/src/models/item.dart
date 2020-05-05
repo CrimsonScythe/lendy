@@ -29,6 +29,9 @@ class Item {
       this._uID
       );
 
+
+  String get uID => _uID;
+
   String get docID => _docID;
 
   String get userName => _userName;

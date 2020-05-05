@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:lendy/resources/chat_provider.dart';
 import 'package:lendy/resources/firestore_provider.dart';
 import 'package:lendy/resources/image_picker_provider.dart';
 import 'package:lendy/resources/location_provider.dart';
@@ -25,6 +27,7 @@ class Repository {
   final _firestoreProvider = FirestoreProvider();
   final _imagePickerProvider = ImagePickerProvider();
   final _locationProvider = LocationProvider();
+  final _chatProvider = ChatProvider();
 
   String userID;
   Position userLocation;
@@ -76,8 +79,13 @@ class Repository {
   Future<void> addUser(uID) =>
       _firestoreProvider.addUser(uID);
 
+  Future<void> createChat(uID, uName, u2ID, u2Name, prodID, prodUrl, prodName) =>
+    _firestoreProvider.createChat(uID, uName, u2ID, u2Name, prodID, prodUrl, prodName);
+
   Future<FirebaseUser> getUser() async =>
       await FirebaseAuth.instance.currentUser();
+
+
 
   List<Future> getDownloadURLs(list) =>
     _firestoreProvider.downloadURLs(list);
@@ -116,6 +124,18 @@ class Repository {
 
   Future<QuerySnapshot> items() =>
       _firestoreProvider.getItems(_repository.user_ID);
+
+  Stream<QuerySnapshot> getMessages(chatID) =>
+      _firestoreProvider.getMessages(_repository.user_ID, chatID);
+
+  List<ChatUser> createChatUsers(List<String> uID, List<String> name, List<String> purl) =>
+      _chatProvider.createChatUsers(uID, name, purl);
+
+  void sendMessage(chatID, message) =>
+      _firestoreProvider.sendMessage(chatID, message);
+
+  Future<QuerySnapshot> getChats(uName) =>
+      _firestoreProvider.getChats(uName);
 
 //  Stream<QuerySnapshot> myList() =>
 //      _firestoreProvider.myList(user_ID);

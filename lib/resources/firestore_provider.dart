@@ -130,6 +130,9 @@ class FirestoreProvider {
 
     return _firestore.collection("users").document(uID)
         .setData(dat);
+
+
+
 //        .setData(new Map<String, Object>{"ctime": Timestamp.now()})
   }
 
@@ -147,9 +150,53 @@ class FirestoreProvider {
 
   }
 
-//  Stream<QuerySnapshot> myList(uID) {
-//    return _firestore.collection('users').document(uID).collection('lend').getDocuments().asStream();
-//  }
+  Future<void> createChat(uID, uName, u2ID, u2Name, prodID, prodUrl, prodName) {
+
+    Map<String, Object> data = Map();
+//    data['user1'] = uName;
+//    data['user2'] =  u2Name;
+    data['owner'] = [uName, u2Name];
+    data['prodName'] = prodName;
+    data['prodUrl'] = prodUrl;
+    data['ctime'] = Timestamp.now();
+
+    String chatID = uID.toString()+u2ID.toString()+prodID.toString();
+
+//    return _firestore.collection("users").document(uID).collection("chats").document(chatID).setData(data);
+    return _firestore.collection("chats").document(chatID).setData(data);
+
+
+  }
+
+  Stream<QuerySnapshot> getMessages(uID, chatID) {
+    return _firestore.collection("chats").document(chatID).collection("messages").snapshots();
+
+//    return _firestore.collectionGroup("chats").where("owner", arrayContains: "uID").getDocuments();
+
+//    return _firestore.collection("users").document(uID).collection("chats").document(chatID).collection("messages").getDocuments();
+  }
+
+  Future<QuerySnapshot> getChats(uName) {
+    return _firestore.collection("chats").where("owner", arrayContains: uName).getDocuments();
+  }
+//
+  void sendMessage(chatID, message) {
+
+    var documentReference = _firestore
+        .collection('chats')
+        .document(chatID)
+        .collection("messages")
+        .document(DateTime.now().millisecondsSinceEpoch.toString());
+
+    _firestore.runTransaction((transaction) async {
+      await transaction.set(documentReference, message.toJson());
+    });
+
+//    return _firestore.collection("chats").document(chatID).collection("messages").add(message);
+
+  }
+
+
 
 
 }

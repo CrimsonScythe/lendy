@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lendy/resources/repository.dart';
+import 'package:lendy/src/blocs/ChatBloc.dart';
 import 'package:lendy/src/models/item.dart';
+import 'package:lendy/src/screens/chat.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ItemScreen extends StatefulWidget {
@@ -21,6 +26,17 @@ class ItemScreen extends StatefulWidget {
 }
 
 class ItemScreenState extends State<ItemScreen> {
+
+  ChatBloc chatBloc;
+
+
+  @override
+  void initState() {
+    super.initState();
+    chatBloc = ChatBloc();
+  }
+
+  StreamSubscription<bool> subscription;
 
   @override
   Widget build(BuildContext context) {
@@ -54,18 +70,57 @@ class ItemScreenState extends State<ItemScreen> {
             cat(widget.item.category),
             pricing(widget.item.prices),
             SizedBox(height: 10,),
-            RaisedButton(
-              child: Text('Chat'),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-              onPressed: () {
-                chat();
-              },
-            )
+            StreamBuilder(
+                stream: chatBloc.showProgress,
+                builder: (context, snapshot){
+                  if (snapshot.hasData && snapshot.data){
+                    return CircularProgressIndicator();
+                  } else {
+                    return RaisedButton(
+                      child: Text('Chat'),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                      onPressed: () {
+                        chat(context, widget.item.uID, widget.item.userName, widget.item.userProfileUrl, widget.item.docID, widget.item.title, widget.item.urls[0]);
+                      },
+                    );
+                  }
+                })
           ],
         ),
       ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    if(subscription!=null) subscription.cancel();
+
+
+  }
+
+  void chat(context, u2ID, u2Name, p2url, prodID, prodName, prodUrl) {
+
+
+    subscription = chatBloc.showProgress.listen((data){});
+
+    var chatID = chatBloc.createChat(u2ID, u2Name, prodID, prodName, prodUrl);
+    chatBloc.createChatUsers(u2ID, u2Name, p2url);
+
+
+    subscription.onData((data){
+      if (!data){
+        Navigator.push(context, MaterialPageRoute(
+            builder: (context) => Chat(bloc: chatBloc, chatID: chatID)
+        ));
+      }
+    });
+
+  }
+
+
+
 
 }
 
@@ -92,8 +147,6 @@ Widget ownedBy(Item item) {
 
 }
 
-void chat() {
-}
 
 Widget title(val) {
   return Column(
